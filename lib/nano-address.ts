@@ -1,5 +1,6 @@
-import * as blake from 'blakejs'
 import { Convert } from './util/convert'
+
+const blake = require('blakejs')
 
 export class NanoAddress {
 

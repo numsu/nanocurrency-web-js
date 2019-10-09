@@ -1,9 +1,10 @@
 import BigNumber from 'bignumber.js'
-import * as blake from 'blakejs'
 import { Ed25519 } from './ed25519'
 import { NanoAddress } from './nano-address'
 import NanoConverter from './nano-converter'
 import { Convert } from './util/convert'
+
+const blake = require('blakejs')
 
 export default class BlockSigner {
 

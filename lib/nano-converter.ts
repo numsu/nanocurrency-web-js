@@ -5,11 +5,11 @@ export default class NanoConverter {
 	/**
 	 * Converts the input value to the wanted unit
 	 *
-	 * @param input {BigNumber} value
-	 * @param inputUnit {Unit} the unit to convert from
-	 * @param outputUnit {Unit} the unit to convert to
+	 * @param input {string | BigNumber} value
+	 * @param inputUnit {string} the unit to convert from
+	 * @param outputUnit {string} the unit to convert to
 	 */
-	static convert(input: BigNumber, inputUnit: string, outputUnit: string): string {
+	static convert(input: string | BigNumber, inputUnit: string, outputUnit: string): string {
 		let value = new BigNumber(input.toString())
 
 		switch (inputUnit) {

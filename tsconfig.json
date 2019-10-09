@@ -7,9 +7,9 @@
 		"strict": true,
 		"esModuleInterop": true,
 		"downlevelIteration": true,
+		"strictNullChecks": false,
 		"types": [
-			"node",
-			"index.d.ts"
+			"node"
 		],
 		"lib": [
 			"es2017"

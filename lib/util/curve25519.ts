@@ -555,7 +555,7 @@ export class Curve25519 {
 		}
 	}
 
-	unpack25519(o: Int32Array, n: Int32Array): void {
+	unpack25519(o: Int32Array, n: Uint8Array): void {
 		for (let i = 0; i < 16; i++) {
 			o[i] = n[2 * i] + (n[2 * i + 1] << 8)
 		}
@@ -563,7 +563,7 @@ export class Curve25519 {
 		o[15] &= 0x7fff
 	}
 
-	unpackNeg(r: Int32Array[], p: Int32Array): number {
+	unpackNeg(r: Int32Array[], p: Uint8Array): number {
 		const t = this.gf(),
 			chk = this.gf(),
 			num = this.gf(),

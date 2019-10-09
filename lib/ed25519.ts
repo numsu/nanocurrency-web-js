@@ -1,6 +1,7 @@
-import * as blake from 'blakejs'
 import { Convert } from './util/convert'
 import { Curve25519 } from './util/curve25519'
+
+const blake = require('blakejs')
 
 export class Ed25519 {
 
