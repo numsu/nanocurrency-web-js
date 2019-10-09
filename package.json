@@ -1,0 +1,27 @@
+{
+	"name": "nanocurrency-web",
+	"version": "1.0.0",
+	"description": "Toolset for Nano cryptocurrency client side offline integrations",
+	"author": "Miro Metsänheimo <miro@metsanheimo.fi>",
+	"license": "MIT",
+	"homepage": "https://github.com/numsu/nanocurrency-web-js#readme",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/numsu/nanocurrency-web-js.git"
+	},
+	"bugs": {
+		"url": "https://github.com/numsu/nanocurrency-web-js/issues"
+	},
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"dependencies": {
+		"bignumber": "^1.1.0",
+		"blakejs": "^1.1.0"
+	},
+	"devDependencies": {
+		"@types/node": "^12.7.12",
+		"typescript": "3.6.3"
+	}
+}
