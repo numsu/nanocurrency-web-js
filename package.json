@@ -15,15 +15,18 @@
 	"main": "index.js",
 	"scripts": {
 		"build": "tsc",
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"test": "mocha --reporter spec"
 	},
 	"dependencies": {
 		"bignumber": "1.1.0",
-		"blakejs": "1.1.0"
+		"blakejs": "1.1.0",
+		"crypto-js": "3.1.9-1"
 	},
 	"devDependencies": {
 		"@types/bignumber.js": "5.0.0",
 		"@types/node": "12.7.12",
+		"chai": "4.2.0",
+		"mocha": "6.2.1",
 		"typescript": "3.6.3"
 	}
 }

@@ -13,8 +13,13 @@ export default class Bip39Mnemonic {
 	}
 
 	createWallet = (entropy: string): { mnemonic: string, seed: string } => {
-		if (entropy.length !== 32) {
-			throw 'Invalid entropy length'
+		if (entropy) {
+			if (entropy.length !== 64) {
+				throw new Error('Invalid entropy length, must be a 64 byte hexadecimal string')
+			}
+			if (!/^[0-9a-f]+$/i.test(entropy)) {
+				throw new Error('Entopy is not a valid hexadecimal string')
+			}
 		}
 
 		if (!entropy) {

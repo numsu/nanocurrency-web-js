@@ -98,7 +98,7 @@ export class Ed25519 {
 	 * @param {String} seed A 32 byte cryptographic secure random hexadecimal string. This is basically the secret key
 	 * @param {Object} Returns sk (Secret key) and pk (Public key) as 32 byte hexadecimal strings
 	 */
-	generateKeys(seed: string): { privateKey: string, publicKey: string } {
+	generateKeys(seed: string): KeyPair {
 		const pk = new Uint8Array(32)
 		const p = [this.curve.gf(), this.curve.gf(), this.curve.gf(), this.curve.gf()]
 		const h = blake
@@ -218,34 +218,9 @@ export class Ed25519 {
 		return 0
 	}
 
-	/**
-	 * TODO: Replace sha512 with blakejs
-	 * Verify a message signature
-	 * @param {Uint8Array} msg Message to be signed as byte array
-	 * @param {Uint8Array} pk Public key as 32 byte array
-	 * @param {Uint8Array} sig Signature as 64 byte array
-	 * @param {Boolean} Returns true if signature is valid
-	 */
-	// verify(msg, pk, sig) {
-	// 	let CURVE = this.curve
-	// 	let p = [CURVE.gf(), CURVE.gf(), CURVE.gf(), CURVE.gf()],
-	// 		q = [CURVE.gf(), CURVE.gf(), CURVE.gf(), CURVE.gf()]
+}
 
-	// 	if (sig.length !== 64) return false
-	// 	if (pk.length !== 32) return false
-	// 	if (CURVE.unpackNeg(q, pk)) return false
-
-	// 	// compute k = SHA512(R || A || M)
-	// 	let k = this.sha512.init().update(sig.subarray(0, 32)).update(pk).digest(msg)
-	// 	this.reduce(k)
-	// 	this.scalarmult(p, q, k)
-
-	// 	let t = new Uint8Array(32)
-	// 	this.scalarbase(q, sig.subarray(32))
-	// 	CURVE.add(p, q)
-	// 	this.pack(t, p)
-
-	// 	return Util.compare(sig.subarray(0, 32), t)
-	// }
-
+export interface KeyPair {
+	privateKey: string
+	publicKey: string
 }

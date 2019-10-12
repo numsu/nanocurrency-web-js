@@ -2,6 +2,7 @@ import Bip32KeyDerivation from './bip32-key-derivation'
 import Bip39Mnemonic from './bip39-mnemonic'
 import { Ed25519 } from './ed25519'
 import { NanoAddress } from './nano-address'
+import { Wallet } from './address-importer'
 
 export class AddressGenerator {
 
@@ -10,7 +11,7 @@ export class AddressGenerator {
 	 *
 	 * @param {String} seedPassword Password for the seed
 	 */
-	generateWallet(entropy = '', seedPassword: string = '') {
+	generateWallet(entropy = '', seedPassword: string = ''): Wallet {
 		const bip39 = new Bip39Mnemonic(seedPassword)
 		const wallet = bip39.createWallet(entropy)
 

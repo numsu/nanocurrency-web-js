@@ -65,12 +65,7 @@ export class Convert {
 		let s: number
 
 		while (decimals.length) {
-			const dec = decimals.shift()
-			if (!dec) {
-				throw 'Invalid decimal'
-			}
-
-			s = 1 * +dec
+			s = 1 * +decimals.shift()
 			for (i = 0; s || i < sum.length; i++) {
 				s += (sum[i] || 0) * 10
 				sum[i] = s % 16
@@ -79,12 +74,7 @@ export class Convert {
 		}
 
 		while (sum.length) {
-			const dec = sum.pop()
-			if (!dec) {
-				throw 'Invalid decimal'
-			}
-
-			hex.push(dec.toString(16))
+			hex.push(sum.pop().toString(16))
 		}
 
 		let joined = hex.join('')

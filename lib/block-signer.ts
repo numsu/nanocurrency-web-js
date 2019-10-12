@@ -13,9 +13,14 @@ export default class BlockSigner {
 
 	preamble = 0x6.toString().padStart(64, '0')
 
-	send(data: SendBlock, privateKey: string) {
+	sign(data: TransactionBlock, privateKey: string): SignedBlock {
+		if (!privateKey) {
+			throw new Error('Please input the private key to sign the block')
+		}
+
 		const balance = NanoConverter.convert(data.walletBalanceRaw, 'RAW', 'NANO')
-		const newBalance = new BigNumber(balance).minus(new BigNumber(data.amount))
+		const amount = NanoConverter.convert(data.amountRaw, 'RAW', 'NANO')
+		const newBalance = new BigNumber(balance).minus(new BigNumber(amount))
 		const rawBalance = NanoConverter.convert(newBalance, 'NANO', 'RAW')
 		const hexBalance = Convert.dec2hex(rawBalance, 16).toUpperCase()
 		const account = this.nanoAddressToHexString(data.fromAddress)
@@ -29,36 +34,6 @@ export default class BlockSigner {
 		return {
 			type: 'state',
 			account: data.fromAddress,
-			previous: data.frontier,
-			representative: data.representativeAddress,
-			balance: rawBalance,
-			link,
-			signature: Convert.ab2hex(signatureBytes),
-			work: data.work,
-		}
-	}
-
-	receive(data: ReceiveBlock, privateKey: string) {
-		let balance = '0'
-		if (data.walletBalanceRaw != '0') {
-			balance = NanoConverter.convert(data.walletBalanceRaw, 'RAW', 'NANO')
-		}
-
-		const amountNano = NanoConverter.convert(data.amount, 'RAW', 'NANO')
-		const newBalance = new BigNumber(balance).plus(new BigNumber(amountNano))
-		const rawBalance = NanoConverter.convert(newBalance, 'NANO', 'RAW')
-		const hexBalance = Convert.dec2hex(rawBalance, 16).toUpperCase()
-		const account = this.nanoAddressToHexString(data.walletAddress)
-		const representative = this.nanoAddressToHexString(data.representativeAddress)
-		const link = data.hash
-
-		const signatureBytes = this.ed25519.sign(
-			this.generateHash(this.preamble, account, data.frontier, representative, hexBalance, link),
-			Convert.hex2ab(privateKey))
-
-		return {
-			type: 'state',
-			account: data.walletAddress,
 			previous: data.frontier,
 			representative: data.representativeAddress,
 			balance: rawBalance,
@@ -90,30 +65,39 @@ export default class BlockSigner {
 				const key = Convert.ab2hex(keyBytes).toUpperCase()
 				return key
 			}
-			throw 'Checksum mismatch'
+			throw new Error('Checksum mismatch')
 		} else {
-			throw 'Illegal characters'
+			throw new Error('Illegal characters')
 		}
 	}
 
 }
 
-export interface SendBlock {
+export interface TransactionBlock {
 	walletBalanceRaw: string
 	fromAddress: string
 	toAddress: string
 	representativeAddress: string
 	frontier: string
-	amount: string
+	amountRaw: string
 	work: string
 }
 
-export interface ReceiveBlock {
+export interface RepresentativeBlock {
 	walletBalanceRaw: string
-	walletAddress: string
+	address: string
 	representativeAddress: string
 	frontier: string
-	hash: string
-	amount: string
+	work: string
+}
+
+export interface SignedBlock {
+	type: 'state'
+	account: string
+	previous: string
+	representative: string
+	balance: string
+	link: string
+	signature: string
 	work: string
 }

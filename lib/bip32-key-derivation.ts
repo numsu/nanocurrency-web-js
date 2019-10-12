@@ -15,7 +15,7 @@ export default class Bip32KeyDerivation {
 		this.seed = seed
 	}
 
-	derivePath = () => {
+	derivePath = (): Chain => {
 		const { key, chainCode } = this.getKeyFromSeed()
 		const segments = this.path
 			.split('/')
@@ -28,13 +28,13 @@ export default class Bip32KeyDerivation {
 		)
 	}
 
-	private getKeyFromSeed = () => {
+	private getKeyFromSeed = (): Chain => {
 		return this.derive(
 			CryptoJS.enc.Hex.parse(this.seed),
 			CryptoJS.enc.Utf8.parse(ED25519_CURVE))
 	}
 
-	private CKDPriv = ({ key, chainCode }: { key: string, chainCode: string }, index: number) => {
+	private CKDPriv = ({ key, chainCode }: Chain, index: number) => {
 		const ib = []
 		ib.push((index >> 24) & 0xff)
 		ib.push((index >> 16) & 0xff)
@@ -47,7 +47,7 @@ export default class Bip32KeyDerivation {
 			CryptoJS.enc.Hex.parse(chainCode))
 	}
 
-	private derive = (data: string, base: string) => {
+	private derive = (data: string, base: string): Chain => {
 		const hmac = CryptoJS.algo.HMAC.create(CryptoJS.algo.SHA512, base)
 		const I = hmac.update(data).finalize().toString()
 		const IL = I.slice(0, I.length / 2)
@@ -59,4 +59,9 @@ export default class Bip32KeyDerivation {
 		}
 	}
 
+}
+
+export interface Chain {
+	key: string
+	chainCode: string
 }

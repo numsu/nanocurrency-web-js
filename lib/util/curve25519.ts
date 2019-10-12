@@ -693,7 +693,7 @@ export class Curve25519 {
 		const sk = seed.slice()
 		const pk = new Uint8Array(32)
 		if (sk.length !== 32) {
-			throw 'Invalid secret key size, expected 32 bytes'
+			throw new Error('Invalid secret key size, expected 32 bytes')
 		}
 
 		sk[0] &= 0xf8

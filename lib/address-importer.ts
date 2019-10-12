@@ -5,17 +5,24 @@ import { NanoAddress } from './nano-address'
 
 export class AddressImporter {
 
-	fromMnemonic(mnemonic: string, seedPassword = '') {
+	fromMnemonic(mnemonic: string, seedPassword = ''): Wallet {
 		const bip39 = new Bip39Mnemonic(seedPassword)
 		if (!bip39.validateMnemonic(mnemonic)) {
-			throw 'Invalid mnemonic phrase'
+			throw new Error('Invalid mnemonic phrase')
 		}
 
 		const seed = bip39.mnemonicToSeed(mnemonic)
 		return this.nano(seed, 0, 0, mnemonic)
 	}
 
-	fromSeed(seed: string, from = 0, to = 0) {
+	fromSeed(seed: string, from = 0, to = 0): Wallet {
+		if (seed.length !== 128) {
+			throw new Error('Invalid seed length, must be a 128 byte hexadecimal string')
+		}
+		if (!/^[0-9a-f]+$/i.test(seed)) {
+			throw new Error('Seed is not a valid hexadecimal string')
+		}
+
 		return this.nano(seed, from, to, undefined)
 	}
 
@@ -23,7 +30,7 @@ export class AddressImporter {
 	 * Generates the wallet
 	 * @param {String} seedPassword Password for the seed
 	 */
-	private nano(seed: string, from: number, to: number, mnemonic?: string) {
+	private nano(seed: string, from: number, to: number, mnemonic?: string): Wallet {
 		const accounts = []
 
 		for (let i = from; i <= to; i++) {
@@ -50,4 +57,17 @@ export class AddressImporter {
 		}
 	}
 
+}
+
+export interface Wallet {
+	mnemonic: string
+	seed: string
+	accounts: Account[]
+}
+
+export interface Account {
+	accountIndex: number
+	privateKey: string
+	publicKey: string
+	address: string
 }

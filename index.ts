@@ -1,6 +1,6 @@
 import { AddressGenerator } from './lib/address-generator'
-import { AddressImporter } from './lib/address-importer'
-import BlockSigner, { SendBlock, ReceiveBlock } from './lib/block-signer'
+import { AddressImporter, Account, Wallet } from './lib/address-importer'
+import BlockSigner, { TransactionBlock, RepresentativeBlock, SignedBlock } from './lib/block-signer'
 
 const generator = new AddressGenerator()
 const importer = new AddressImporter()
@@ -17,17 +17,17 @@ const wallet = {
 	 * The Nano address is derived from the public key using standard Nano encoding.
 	 * The address is prefixed with 'nano_'.
 	 *
-	 * Generation uses CryptoJS to generate random entropy. You can give your own entropy
+	 * Generation uses CryptoJS to generate random entropy by default. You can give your own entropy
 	 * as a parameter and it will be used instead.
 	 *
 	 * An optional seed password can be used to encrypt the mnemonic phrase so the seed
 	 * cannot be derived correctly without the password. Recovering the password is not possible.
 	 *
-	 * @param {string} [entropy] Optional entropy to be used instead of the default
+	 * @param {string} [entropy] Optional 64 byte hexadecimal string entropy to be used instead of the default
 	 * @param {string} [seedPassword] Optional seed password
 	 * @returns the generated mnemonic, seed and account
 	 */
-	generate: (entropy?: string, seedPassword?: string) => {
+	generate: (entropy?: string, seedPassword?: string): Wallet => {
 		return generator.generateWallet(entropy, seedPassword)
 	},
 
@@ -46,7 +46,7 @@ const wallet = {
 	 * @throws Throws an error if the mnemonic phrase doesn't pass validations
 	 * @returns the imported mnemonic, seed and account
 	 */
-	fromMnemonic: (mnemonic: string, seedPassword?: string) => {
+	fromMnemonic: (mnemonic: string, seedPassword?: string): Wallet => {
 		return importer.fromMnemonic(mnemonic, seedPassword)
 	},
 
@@ -63,7 +63,7 @@ const wallet = {
 	 * @param {string} seed The seed
 	 * @returns the importes seed and account
 	 */
-	fromSeed: (seed: string) => {
+	fromSeed: (seed: string): Wallet => {
 		return importer.fromSeed(seed)
 	},
 
@@ -78,7 +78,7 @@ const wallet = {
 	 * @param {number} from The start index
 	 * @param {number} to The end index
 	 */
-	accounts: (seed: string, from: number, to: number) => {
+	accounts: (seed: string, from: number, to: number): Account[] => {
 		return importer.fromSeed(seed, from, to).accounts
 	},
 
@@ -90,28 +90,53 @@ const block = {
 	/**
 	 * Sign a send block with the input parameters
 	 *
-	 * @param {SendBlock} data The data for the block
-	 * @param {string} privateKey Private key to sign the block
-	 */
-	send: (data: SendBlock, privateKey: string) => {
-		return blockSigner.send(data, privateKey)
-	},
-
-	/**
-	 * Sign a receive block with the input parameters
+	 * For a receive block, put your own address to the 'toAddress' property.
+	 * All the NANO amounts should be input in RAW format. The addresses should be
+	 * valid Nano addresses. Fetch the current balance, frontier (previous block) and
+	 * representative address from the blockchain and generate work for the signature.
+	 *
+	 * The return value of this function is ready to be published to the blockchain.
+	 *
+	 * NOTICE: Always fetch up-to-date account info from the blockchain
+	 *         before signing the block
 	 *
 	 * @param {SendBlock} data The data for the block
 	 * @param {string} privateKey Private key to sign the block
 	 */
-	receive: (data: ReceiveBlock, privateKey: string) => {
-		return blockSigner.receive(data, privateKey)
+	sign: (data: TransactionBlock, privateKey: string): SignedBlock => {
+		return blockSigner.sign(data, privateKey)
 	},
 
-	// TODO: change representative block
+	/**
+	 * Sign a representative change block with the input parameters
+	 *
+	 * For a change block, put your own address to the 'address' property.
+	 * All the NANO amounts should be input in RAW format. The addresses should be
+	 * valid Nano addresses. Fetch the current balance, previous block from the
+	 * blockchain and generate work for the signature. Set the new representative address
+	 * as the representative.
+	 *
+	 * NOTICE: Always fetch up-to-date account info from the blockchain
+	 *         before signing the block
+	 *
+	 * @param {RepresentativeBlock} data The data for the block
+	 * @param {string} privateKey Private key to sign the block
+	 *
+	 */
+	representative: (data: RepresentativeBlock, privateKey: string): SignedBlock => {
+		const block: TransactionBlock = {
+			...data,
+			fromAddress: data.address,
+			amountRaw: '0',
+			toAddress: 'nano_1111111111111111111111111111111111111111111111111111hifc8npp' // Burn address
+		}
+
+		return blockSigner.sign(block, privateKey)
+	},
 
 }
 
-export default {
+export {
 	wallet,
 	block,
 }
