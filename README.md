@@ -22,6 +22,7 @@ npm install nanocurrency-web
 ```
 | WARNING: do not use any of the keys or addresses listed below to send real assets |
 | --- |
+
 Wallet handling
 ```
 import { wallet } from 'nanocurrency-web'
