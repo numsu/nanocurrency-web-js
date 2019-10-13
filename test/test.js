@@ -164,7 +164,7 @@ describe('unit conversion tests', () => {
 
 	it('should convert raw to nano', () => {
 		const result = converter.convert('1000000000000000000000000000000', 'RAW', 'NANO')
-		expect(result).to.equal('1')
+		expect(result).to.equal('1.000000000000000')
 	})
 
 })
