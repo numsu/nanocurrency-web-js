@@ -1,4 +1,6 @@
 # nanocurrency-web
+[![Build Status](https://travis-ci.org/numsu/nanocurrency-web-js.svg?branch=master)](https://travis-ci.org/numsu/nanocurrency-web-js)
+
 Toolkit for Nano cryptocurrency client side offline implementations allowing you to build web- and mobile applications using Nano without compromising the user's keys by sending them out of their own device.
 
 The toolkit supports creating and importing wallets and signing blocks on-device. Meaning that the user's keys should never be required to leave the device.
