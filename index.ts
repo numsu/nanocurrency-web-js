@@ -1,6 +1,8 @@
 import { AddressGenerator } from './lib/address-generator'
 import { AddressImporter, Account, Wallet } from './lib/address-importer'
 import BlockSigner, { TransactionBlock, RepresentativeBlock, SignedBlock } from './lib/block-signer'
+import BigNumber from 'bignumber.js'
+import NanoConverter from './lib/nano-converter'
 
 const generator = new AddressGenerator()
 const importer = new AddressImporter()
@@ -136,7 +138,25 @@ const block = {
 
 }
 
+const converter = {
+
+	/**
+	 * Convert Nano values
+	 *
+	 * Possible units are RAW, NANO, MRAI, KRAI, RAI
+	 *
+	 * @param {string | BigNumber} input The input value
+	 * @param {string} inputUnit The unit of the input value
+	 * @param {string} outputUnit The unit you wish to convert to
+	 */
+	convert: (input: string | BigNumber, inputUnit: string, outputUnit: string) => {
+		return NanoConverter.convert(input, inputUnit, outputUnit)
+	},
+
+}
+
 export {
 	wallet,
 	block,
+	converter,
 }

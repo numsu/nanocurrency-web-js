@@ -1,7 +1,7 @@
 'use strict'
 
 const expect = require('chai').expect
-const { wallet, block } = require('../dist/index')
+const { wallet, block, converter } = require('../dist/index')
 
 // WARNING: Do not send any funds to the test vectors below
 describe('generate wallet test', () => {
@@ -151,6 +151,20 @@ describe('block signing tests using official test vectors', () => {
 			work: '0000000000000000',
 		}, '781186FB9EF17DB6E3D1056550D9FAE5D5BBADA6A6BC370E4CBB938B1DC71DA3') // Did not find a private key at nano docs for this address
 		expect(result.signature.toUpperCase()).to.equal('A3C3C66D6519CBC0A198E56855942DEACC6EF741021A1B11279269ADC587DE1DA53CD478B8A47553231104CF24D742E1BB852B0546B87038C19BAE20F9082B0D')
+	})
+
+})
+
+describe('unit conversion tests', () => {
+
+	it('should convert nano to raw', () => {
+		const result = converter.convert('1', 'NANO', 'RAW')
+		expect(result).to.equal('1000000000000000000000000000000')
+	})
+
+	it('should convert raw to nano', () => {
+		const result = converter.convert('1000000000000000000000000000000', 'RAW', 'NANO')
+		expect(result).to.equal('1')
 	})
 
 })
