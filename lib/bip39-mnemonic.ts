@@ -1,5 +1,5 @@
 import words from './words'
-import { Util } from './util/Util'
+import { Util } from './util/util'
 import { Convert } from './util/convert'
 
 const CryptoJS = require('crypto-js')
