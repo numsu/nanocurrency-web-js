@@ -1,0 +1,8 @@
+.git/
+node_modules/
+test/
+.gitignore
+.editorconfig
+.travis.yml
+src
+tsconfig.json
