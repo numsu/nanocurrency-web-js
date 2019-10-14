@@ -4,7 +4,8 @@ import { NanoAddress } from './nano-address'
 import NanoConverter from './nano-converter'
 import { Convert } from './util/convert'
 
-const blake = require('blakejs')
+//@ts-ignore
+import { blake2b, blake2bInit, blake2bUpdate, blake2bFinal } from 'blakejs'
 
 export default class BlockSigner {
 
@@ -44,14 +45,14 @@ export default class BlockSigner {
 	}
 
 	private generateHash(preamble: string, account: string, previous: string, representative: string, balance: string, link: string) {
-		const ctx = blake.blake2bInit(32, undefined)
-		blake.blake2bUpdate(ctx, Convert.hex2ab(preamble))
-		blake.blake2bUpdate(ctx, Convert.hex2ab(account))
-		blake.blake2bUpdate(ctx, Convert.hex2ab(previous))
-		blake.blake2bUpdate(ctx, Convert.hex2ab(representative))
-		blake.blake2bUpdate(ctx, Convert.hex2ab(balance))
-		blake.blake2bUpdate(ctx, Convert.hex2ab(link))
-		return blake.blake2bFinal(ctx)
+		const ctx = blake2bInit(32, undefined)
+		blake2bUpdate(ctx, Convert.hex2ab(preamble))
+		blake2bUpdate(ctx, Convert.hex2ab(account))
+		blake2bUpdate(ctx, Convert.hex2ab(previous))
+		blake2bUpdate(ctx, Convert.hex2ab(representative))
+		blake2bUpdate(ctx, Convert.hex2ab(balance))
+		blake2bUpdate(ctx, Convert.hex2ab(link))
+		return blake2bFinal(ctx)
 	}
 
 	private nanoAddressToHexString(addr: string): string {
@@ -60,7 +61,7 @@ export default class BlockSigner {
 		if (isValid) {
 			const keyBytes = this.nanoAddress.decodeNanoBase32(addr.substring(0, 52))
 			const hashBytes = this.nanoAddress.decodeNanoBase32(addr.substring(52, 60))
-			const blakeHash = blake.blake2b(keyBytes, undefined, 5).reverse()
+			const blakeHash = blake2b(keyBytes, undefined, 5).reverse()
 			if (Convert.ab2hex(hashBytes) == Convert.ab2hex(blakeHash)) {
 				const key = Convert.ab2hex(keyBytes).toUpperCase()
 				return key

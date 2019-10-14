@@ -1,7 +1,8 @@
 import { Convert } from './util/convert'
 import { Curve25519 } from './util/curve25519'
 
-const blake = require('blakejs')
+//@ts-ignore
+import { blake2b } from 'blakejs'
 
 export class Ed25519 {
 
@@ -101,9 +102,7 @@ export class Ed25519 {
 	generateKeys(seed: string): KeyPair {
 		const pk = new Uint8Array(32)
 		const p = [this.curve.gf(), this.curve.gf(), this.curve.gf(), this.curve.gf()]
-		const h = blake
-			.blake2b(Convert.hex2ab(seed), undefined, 64)
-			.slice(0, 32)
+		const h = blake2b(Convert.hex2ab(seed), undefined, 64).slice(0, 32)
 
 		h[0] &= 0xf8
 		h[31] &= 0x7f
@@ -210,7 +209,7 @@ export class Ed25519 {
 			input[i] = m[i]
 		}
 
-		const hash = blake.blake2b(input)
+		const hash = blake2b(input)
 		for (let i = 0; i < 64; ++i) {
 			out[i] = hash[i]
 		}

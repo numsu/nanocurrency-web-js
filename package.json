@@ -1,6 +1,6 @@
 {
 	"name": "nanocurrency-web",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"description": "Toolset for Nano cryptocurrency client side offline integrations",
 	"author": "Miro Metsänheimo <miro@metsanheimo.fi>",
 	"license": "MIT",
@@ -12,10 +12,18 @@
 	"bugs": {
 		"url": "https://github.com/numsu/nanocurrency-web-js/issues"
 	},
+	"keywords": [
+		"nano",
+		"currency",
+		"mnemonic",
+		"crypto"
+	],
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
+	"unpkg": "dist/index.min.js",
 	"scripts": {
-		"build": "tsc",
+		"build": "tsc && npm run build:webpack",
+		"build:webpack": "webpack",
 		"test": "mocha --reporter spec"
 	},
 	"dependencies": {
@@ -27,6 +35,9 @@
 		"@types/node": "12.7.12",
 		"chai": "4.2.0",
 		"mocha": "6.2.1",
-		"typescript": "3.6.3"
+		"ts-loader": "6.2.0",
+		"typescript": "3.6.3",
+		"webpack": "4.41.1",
+		"webpack-cli": "3.3.9"
 	}
 }
