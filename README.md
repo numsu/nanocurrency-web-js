@@ -1,5 +1,7 @@
 # nanocurrency-web
 [![Build Status](https://travis-ci.org/numsu/nanocurrency-web-js.svg?branch=master)](https://travis-ci.org/numsu/nanocurrency-web-js)
+[![GitHub license](https://img.shields.io/github/license/numsu/nanocurrency-web-js)](https://github.com/numsu/nanocurrency-web-js/blob/master/LICENSE)
+[![npm version](https://badge.fury.io/js/nanocurrency-web.svg)](https://badge.fury.io/js/nanocurrency-web)
 
 Toolkit for Nano cryptocurrency client side offline implementations allowing you to build web- and mobile applications using Nano without compromising the user's keys by sending them out of their own device.
 

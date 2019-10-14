@@ -2,7 +2,8 @@ import words from './words'
 import { Util } from './util/util'
 import { Convert } from './util/convert'
 
-const CryptoJS = require('crypto-js')
+//@ts-ignore
+import { algo, enc, lib, PBKDF2, SHA256 } from 'crypto-js'
 
 export default class Bip39Mnemonic {
 
@@ -82,23 +83,23 @@ export default class Bip39Mnemonic {
 		const normalizedMnemonic = Util.normalizeUTF8(mnemonic)
 		const normalizedPassword = 'mnemonic' + Util.normalizeUTF8(this.password)
 
-		return CryptoJS.PBKDF2(
+		return PBKDF2(
 			normalizedMnemonic,
 			normalizedPassword,
 			{
 				keySize: 512 / 32,
 				iterations: 2048,
-				hasher: CryptoJS.algo.SHA512,
+				hasher: algo.SHA512,
 			})
-			.toString(CryptoJS.enc.Hex)
+			.toString(enc.Hex)
 	}
 
 	private randomHex = (length: number): string => {
-		return CryptoJS.lib.WordArray.random(length / 2).toString()
+		return lib.WordArray.random(length / 2).toString()
 	}
 
 	private calculateChecksum = (entropyHex: string): string => {
-		const entropySha256 = CryptoJS.SHA256(CryptoJS.enc.Hex.parse(entropyHex)).toString()
+		const entropySha256 = SHA256(enc.Hex.parse(entropyHex)).toString()
 		return entropySha256.substr(0, entropySha256.length / 32)
 	}
 

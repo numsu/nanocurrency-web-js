@@ -1,6 +1,7 @@
 import { Convert } from './util/convert'
 
-const CryptoJS = require('crypto-js')
+//@ts-ignore
+import { enc, algo } from 'crypto-js'
 
 const ED25519_CURVE = 'ed25519 seed'
 const HARDENED_OFFSET = 0x80000000
@@ -30,8 +31,8 @@ export default class Bip32KeyDerivation {
 
 	private getKeyFromSeed = (): Chain => {
 		return this.derive(
-			CryptoJS.enc.Hex.parse(this.seed),
-			CryptoJS.enc.Utf8.parse(ED25519_CURVE))
+			enc.Hex.parse(this.seed),
+			enc.Utf8.parse(ED25519_CURVE))
 	}
 
 	private CKDPriv = ({ key, chainCode }: Chain, index: number) => {
@@ -43,12 +44,12 @@ export default class Bip32KeyDerivation {
 		const data = '00' + key + Convert.ab2hex(new Uint8Array(ib).buffer)
 
 		return this.derive(
-			CryptoJS.enc.Hex.parse(data),
-			CryptoJS.enc.Hex.parse(chainCode))
+			enc.Hex.parse(data),
+			enc.Hex.parse(chainCode))
 	}
 
 	private derive = (data: string, base: string): Chain => {
-		const hmac = CryptoJS.algo.HMAC.create(CryptoJS.algo.SHA512, base)
+		const hmac = algo.HMAC.create(algo.SHA512, base)
 		const I = hmac.update(data).finalize().toString()
 		const IL = I.slice(0, I.length / 2)
 		const IR = I.slice(I.length / 2)

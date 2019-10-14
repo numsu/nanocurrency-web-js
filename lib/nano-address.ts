@@ -1,6 +1,7 @@
 import { Convert } from './util/convert'
 
-const blake = require('blakejs')
+//@ts-ignore
+import { blake2b } from 'blakejs'
 
 export class NanoAddress {
 
@@ -9,10 +10,7 @@ export class NanoAddress {
 
 	deriveAddress = (publicKey: string): string => {
 		const publicKeyBytes = Convert.hex2ab(publicKey)
-		const checksum = blake
-			.blake2b(publicKeyBytes, undefined, 5)
-			.reverse()
-
+		const checksum = blake2b(publicKeyBytes, undefined, 5).reverse()
 		const encoded = this.encodeNanoBase32(publicKeyBytes)
 		const encodedChecksum = this.encodeNanoBase32(checksum)
 
