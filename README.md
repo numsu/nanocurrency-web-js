@@ -21,6 +21,8 @@ The toolkit supports creating and importing wallets and signing blocks on-device
 
 ## Usage
 
+### From NPM
+
 ```
 npm install nanocurrency-web
 ```
@@ -162,6 +164,16 @@ const converted = converter.convert('1', 'NANO', 'RAW')
 // Convert 1 RAW to Nano
 const converted = converter.convert('1000000000000000000000000000000', 'RAW', 'NANO')
 ```
+
+### In web
+
+```
+<script src="https://unpkg.com/nanocurrency-web@1.0.3" type="text/javascript"></script>
+<scrypt type="text/javascript">
+	NanocurrencyWeb.wallet.generate(...);
+</script>
+```
+
 ---
 
 ## Contributions

@@ -18,6 +18,7 @@ module.exports = {
 	output: {
 		filename: 'index.min.js',
 		path: path.resolve(__dirname, 'dist'),
-		libraryTarget: 'commonjs2',
+		libraryTarget: 'var',
+		library: 'NanocurrencyWeb',
 	},
 }
