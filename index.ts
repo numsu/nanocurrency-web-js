@@ -1,5 +1,5 @@
-import { AddressGenerator } from './lib/address-generator'
-import { AddressImporter, Account, Wallet } from './lib/address-importer'
+import AddressGenerator from './lib/address-generator'
+import AddressImporter, { Account, Wallet } from './lib/address-importer'
 import BlockSigner, { TransactionBlock, RepresentativeBlock, SignedBlock } from './lib/block-signer'
 import BigNumber from 'bignumber.js'
 import NanoConverter from './lib/nano-converter'

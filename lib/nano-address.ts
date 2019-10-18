@@ -1,9 +1,9 @@
-import { Convert } from './util/convert'
+import Convert from './util/convert'
 
 //@ts-ignore
 import { blake2b } from 'blakejs'
 
-export class NanoAddress {
+export default class NanoAddress {
 
 	readonly alphabet = '13456789abcdefghijkmnopqrstuwxyz'
 	readonly prefix = 'nano_'

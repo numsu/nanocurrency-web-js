@@ -1,10 +1,10 @@
 import Bip32KeyDerivation from './bip32-key-derivation'
 import Bip39Mnemonic from './bip39-mnemonic'
-import { Ed25519 } from './ed25519'
-import { NanoAddress } from './nano-address'
+import Ed25519 from './ed25519'
+import NanoAddress from './nano-address'
 import { Wallet } from './address-importer'
 
-export class AddressGenerator {
+export default class AddressGenerator {
 
 	/**
 	 * Generates the wallet

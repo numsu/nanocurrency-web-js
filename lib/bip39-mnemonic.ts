@@ -1,6 +1,6 @@
+import Convert from './util/convert'
+import Util from './util/util'
 import words from './words'
-import { Util } from './util/util'
-import { Convert } from './util/convert'
 
 //@ts-ignore
 import { algo, enc, lib, PBKDF2, SHA256 } from 'crypto-js'

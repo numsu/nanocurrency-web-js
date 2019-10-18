@@ -1,10 +1,10 @@
-import { Convert } from './util/convert'
-import { Curve25519 } from './util/curve25519'
+import Convert from './util/convert'
+import Curve25519 from './util/curve25519'
 
 //@ts-ignore
 import { blake2b } from 'blakejs'
 
-export class Ed25519 {
+export default class Ed25519 {
 
 	curve: Curve25519
 	X: Int32Array

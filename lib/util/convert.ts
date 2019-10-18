@@ -1,4 +1,4 @@
-export class Convert {
+export default class Convert {
 
 	/**
 	 * Convert a string (UTF-8 encoded) to a byte array

@@ -1,6 +1,6 @@
-import { Util } from './util'
+import Util from './util'
 
-export class Curve25519 {
+export default class Curve25519 {
 
 	gf0: Int32Array
 	gf1: Int32Array

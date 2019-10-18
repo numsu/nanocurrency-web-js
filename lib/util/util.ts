@@ -1,4 +1,4 @@
-export class Util {
+export default class Util {
 
 	/**
 	 * Time constant comparison of two arrays

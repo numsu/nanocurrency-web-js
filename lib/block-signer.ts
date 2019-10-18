@@ -1,8 +1,8 @@
 import BigNumber from 'bignumber.js'
-import { Ed25519 } from './ed25519'
-import { NanoAddress } from './nano-address'
+import Convert from './util/convert'
+import Ed25519 from './ed25519'
+import NanoAddress from './nano-address'
 import NanoConverter from './nano-converter'
-import { Convert } from './util/convert'
 
 //@ts-ignore
 import { blake2b, blake2bInit, blake2bUpdate, blake2bFinal } from 'blakejs'

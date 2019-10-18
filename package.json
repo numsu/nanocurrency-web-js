@@ -1,7 +1,7 @@
 {
 	"name": "nanocurrency-web",
-	"version": "1.0.3",
-	"description": "Toolset for Nano cryptocurrency client side offline integrations",
+	"version": "1.0.4",
+	"description": "Toolkit for Nano cryptocurrency client side offline integrations",
 	"author": "Miro Metsänheimo <miro@metsanheimo.fi>",
 	"license": "MIT",
 	"homepage": "https://github.com/numsu/nanocurrency-web-js#readme",
@@ -16,13 +16,16 @@
 		"nano",
 		"currency",
 		"mnemonic",
-		"crypto"
+		"crypto",
+		"wallet",
+		"block",
+		"sign"
 	],
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"unpkg": "dist/index.min.js",
 	"scripts": {
-		"build": "tsc && npm run build:webpack",
+		"build": "rm -rf dist && tsc && npm run build:webpack",
 		"build:webpack": "webpack",
 		"test": "mocha --reporter spec"
 	},
