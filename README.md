@@ -93,7 +93,7 @@ const data = {
 }
 
 // Returns a correctly formatted and signed block ready to be sent to the blockchain
-const signedBlock = block.sign(data, privateKey)
+const signedBlock = block.receive(data, privateKey)
 ```
 
 Signing a send block
@@ -125,7 +125,7 @@ const data = {
 }
 
 // Returns a correctly formatted and signed block ready to be sent to the blockchain
-const signedBlock = block.sign(data, privateKey)
+const signedBlock = block.send(data, privateKey)
 ```
 
 Signing a change representative block
@@ -151,7 +151,7 @@ const data = {
 }
 
 // Returns a correctly formatted and signed block ready to be sent to the blockchain
-const signedBlock = block.sign(data, privateKey)
+const signedBlock = block.representative(data, privateKey)
 ```
 
 Converting units
