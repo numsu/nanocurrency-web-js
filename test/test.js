@@ -117,20 +117,20 @@ describe('derive more accounts from the same seed test', () => {
 describe('block signing tests using official test vectors', () => {
 
 	it('should create a valid signature for a receive block', () => {
-		const result = block.sign({
+		const result = block.receive({
 			walletBalanceRaw: '18618869000000000000000000000000',
-			fromAddress: 'nano_1e5aqegc1jb7qe964u4adzmcezyo6o146zb8hm6dft8tkp79za3sxwjym5rx',
-			toAddress: 'nano_3kyb49tqpt39ekc49kbej51ecsjqnimnzw1swxz4boix4ctm93w517umuiw8',
+			transactionHash: 'CBC911F57B6827649423C92C88C0C56637A4274FF019E77E24D61D12B5338783',
+			toAddress: 'nano_1e5aqegc1jb7qe964u4adzmcezyo6o146zb8hm6dft8tkp79za3sxwjym5rx',
 			representativeAddress: 'nano_1stofnrxuz3cai7ze75o174bpm7scwj9jn3nxsn8ntzg784jf1gzn1jjdkou',
 			frontier: '92BA74A7D6DC7557F3EDA95ADC6341D51AC777A0A6FF0688A5C492AB2B2CB40D',
 			amountRaw: '7000000000000000000000000000000',
 			work: 'c5cf86de24b24419',
 		}, '781186FB9EF17DB6E3D1056550D9FAE5D5BBADA6A6BC370E4CBB938B1DC71DA3')
-		expect(result.signature.toUpperCase()).to.equal('EEFFE1EFCCC8F2F6F2F1B79B80ABE855939DD9D6341323186494ADEE775DAADB3B6A6A07A85511F2185F6E739C4A54F1454436E22255A542ED879FD04FEED001')
+		expect(result.signature.toUpperCase()).to.equal('F25D751AD0379A5718E08F3773DA6061A9E18842EF5615163C7F207B804CC2C5DD2720CFCE5FE6A78E4CC108DD9CAB65051526403FA2C24A1ED943BB4EA7880B')
 	})
 
 	it('should create a valid signature for a send block', () => {
-		const result = block.sign({
+		const result = block.send({
 			walletBalanceRaw: '5618869000000000000000000000000',
 			fromAddress: 'nano_1e5aqegc1jb7qe964u4adzmcezyo6o146zb8hm6dft8tkp79za3sxwjym5rx',
 			toAddress: 'nano_1q3hqecaw15cjt7thbtxu3pbzr1eihtzzpzxguoc37bj1wc5ffoh7w74gi6p',

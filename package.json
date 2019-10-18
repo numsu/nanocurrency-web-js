@@ -1,6 +1,6 @@
 {
 	"name": "nanocurrency-web",
-	"version": "1.0.4",
+	"version": "1.0.5",
 	"description": "Toolkit for Nano cryptocurrency client side offline integrations",
 	"author": "Miro Metsänheimo <miro@metsanheimo.fi>",
 	"license": "MIT",

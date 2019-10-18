@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js'
-import Convert from './util/convert'
 import Ed25519 from './ed25519'
+import Convert from './util/convert'
 import NanoAddress from './nano-address'
 import NanoConverter from './nano-converter'
 
@@ -14,22 +14,110 @@ export default class BlockSigner {
 
 	preamble = 0x6.toString().padStart(64, '0')
 
-	sign(data: TransactionBlock, privateKey: string): SignedBlock {
+	receive(data: ReceiveBlock, privateKey: string): SignedBlock {
+		const validateInputRaw = (input: string) => !!input && !isNaN(+input)
+		if (!validateInputRaw(data.walletBalanceRaw)) {
+			throw new Error('Invalid format in wallet balance')
+		}
+
+		if (!validateInputRaw(data.amountRaw)) {
+			throw new Error('Invalid format in send amount')
+		}
+
+		if (!this.nanoAddress.validateNanoAddress(data.toAddress)) {
+			throw new Error('Invalid toAddress')
+		}
+
+		if (!this.nanoAddress.validateNanoAddress(data.representativeAddress)) {
+			throw new Error('Invalid representativeAddress')
+		}
+
+		if (!data.transactionHash) {
+			throw new Error('No transaction hash')
+		}
+
+		if (!data.frontier) {
+			throw new Error('No frontier')
+		}
+
+		if (!data.work) {
+			throw new Error('No work')
+		}
+
 		if (!privateKey) {
 			throw new Error('Please input the private key to sign the block')
 		}
 
-		const balance = NanoConverter.convert(data.walletBalanceRaw, 'RAW', 'NANO')
-		const amount = NanoConverter.convert(data.amountRaw, 'RAW', 'NANO')
-		const newBalance = new BigNumber(balance).minus(new BigNumber(amount))
-		const rawBalance = NanoConverter.convert(newBalance, 'NANO', 'RAW')
-		const hexBalance = Convert.dec2hex(rawBalance, 16).toUpperCase()
+		const balanceNano = NanoConverter.convert(data.walletBalanceRaw, 'RAW', 'NANO')
+		const amountNano = NanoConverter.convert(data.amountRaw, 'RAW', 'NANO')
+		const newBalanceNano = new BigNumber(balanceNano).plus(new BigNumber(amountNano))
+		const newBalanceRaw = NanoConverter.convert(newBalanceNano, 'NANO', 'RAW')
+		const newBalanceHex = Convert.dec2hex(newBalanceRaw, 16).toUpperCase()
+		const account = this.nanoAddressToHexString(data.toAddress)
+		const link = data.transactionHash
+		const representative = this.nanoAddressToHexString(data.representativeAddress)
+
+		const signatureBytes = this.ed25519.sign(
+			this.generateHash(this.preamble, account, data.frontier, representative, newBalanceHex, link),
+			Convert.hex2ab(privateKey))
+
+		return {
+			type: 'state',
+			account: data.toAddress,
+			previous: data.frontier,
+			representative: data.representativeAddress,
+			balance: newBalanceRaw,
+			link: link,
+			signature: Convert.ab2hex(signatureBytes),
+			work: data.work,
+		}
+	}
+
+	send(data: SendBlock, privateKey: string): SignedBlock {
+		const validateInputRaw = (input: string) => !!input && !isNaN(+input)
+		if (!validateInputRaw(data.walletBalanceRaw)) {
+			throw new Error('Invalid format in wallet balance')
+		}
+
+		if (!validateInputRaw(data.amountRaw)) {
+			throw new Error('Invalid format in send amount')
+		}
+
+		if (!this.nanoAddress.validateNanoAddress(data.toAddress)) {
+			throw new Error('Invalid toAddress')
+		}
+
+		if (!this.nanoAddress.validateNanoAddress(data.fromAddress)) {
+			throw new Error('Invalid fromAddress')
+		}
+
+		if (!this.nanoAddress.validateNanoAddress(data.representativeAddress)) {
+			throw new Error('Invalid representativeAddress')
+		}
+
+		if (!data.frontier) {
+			throw new Error('No frontier')
+		}
+
+		if (!data.work) {
+			throw new Error('No work')
+		}
+
+		if (!privateKey) {
+			throw new Error('Please input the private key to sign the block')
+		}
+
+		const balanceNano = NanoConverter.convert(data.walletBalanceRaw, 'RAW', 'NANO')
+		const amountNano = NanoConverter.convert(data.amountRaw, 'RAW', 'NANO')
+		const newBalanceNano = new BigNumber(balanceNano).minus(new BigNumber(amountNano))
+		const newBalanceRaw = NanoConverter.convert(newBalanceNano, 'NANO', 'RAW')
+		const newBalanceHex = Convert.dec2hex(newBalanceRaw, 16).toUpperCase()
 		const account = this.nanoAddressToHexString(data.fromAddress)
 		const link = this.nanoAddressToHexString(data.toAddress)
 		const representative = this.nanoAddressToHexString(data.representativeAddress)
 
 		const signatureBytes = this.ed25519.sign(
-			this.generateHash(this.preamble, account, data.frontier, representative, hexBalance, link),
+			this.generateHash(this.preamble, account, data.frontier, representative, newBalanceHex, link),
 			Convert.hex2ab(privateKey))
 
 		return {
@@ -37,8 +125,8 @@ export default class BlockSigner {
 			account: data.fromAddress,
 			previous: data.frontier,
 			representative: data.representativeAddress,
-			balance: rawBalance,
-			link,
+			balance: newBalanceRaw,
+			link: link,
 			signature: Convert.ab2hex(signatureBytes),
 			work: data.work,
 		}
@@ -74,7 +162,17 @@ export default class BlockSigner {
 
 }
 
-export interface TransactionBlock {
+export interface ReceiveBlock {
+	walletBalanceRaw: string
+	toAddress: string
+	transactionHash: string
+	frontier: string
+	representativeAddress: string
+	amountRaw: string
+	work: string
+}
+
+export interface SendBlock {
 	walletBalanceRaw: string
 	fromAddress: string
 	toAddress: string

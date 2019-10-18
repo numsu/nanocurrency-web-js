@@ -27,7 +27,7 @@ export default class NanoConverter {
 				value = value.shiftedBy(24)
 				break
 			default:
-				throw `Unkown input unit ${inputUnit}, expected one of the following: RAW, NANO, MRAI, KRAI, RAI`
+				throw new Error(`Unkown input unit ${inputUnit}, expected one of the following: RAW, NANO, MRAI, KRAI, RAI`)
 		}
 
 		switch (outputUnit) {
@@ -41,7 +41,7 @@ export default class NanoConverter {
 			case 'RAI':
 				return value.shiftedBy(-24).toFixed(9, 1)
 			default:
-				throw `Unknown output unit ${outputUnit}, expected one of the following: RAW, NANO, MRAI, KRAI, RAI`
+				throw new Error(`Unknown output unit ${outputUnit}, expected one of the following: RAW, NANO, MRAI, KRAI, RAI`)
 		}
 	}
 

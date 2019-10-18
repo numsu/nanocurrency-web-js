@@ -73,9 +73,6 @@ const data = {
 	// Your current balance in RAW
 	walletBalanceRaw: '18618869000000000000000000000000',
 
-	// From the pending transaction
-	fromAddress: 'nano_1e5aqegc1jb7qe964u4adzmcezyo6o146zb8hm6dft8tkp79za3sxwjym5rx',
-
 	// Your address
 	toAddress: 'nano_3kyb49tqpt39ekc49kbej51ecsjqnimnzw1swxz4boix4ctm93w517umuiw8',
 
@@ -85,10 +82,13 @@ const data = {
 	// From wallet info
 	frontier: '92BA74A7D6DC7557F3EDA95ADC6341D51AC777A0A6FF0688A5C492AB2B2CB40D',
 
+	// From the pending transaction
+	transactionHash: 'CBC911F57B6827649423C92C88C0C56637A4274FF019E77E24D61D12B5338783',
+
 	// From the pending transaction in RAW
 	amountRaw: '7000000000000000000000000000000',
 
-	// Generate the work server-side or a DPOW service
+	// Generate the work server-side or with a DPOW service
 	work: 'c5cf86de24b24419',
 }
 
@@ -120,7 +120,7 @@ const data = {
 	// The amount to send in RAW
 	amountRaw: '2000000000000000000000000000000',
 
-	// Generate work on server-side or a DPOW service
+	// Generate work on server-side or with a DPOW service
 	work: 'fbffed7c73b61367',
 }
 
@@ -146,7 +146,7 @@ const data = {
 	// Previous block, from account info
 	frontier: '128106287002E595F479ACD615C818117FCB3860EC112670557A2467386249D4',
 
-	// Generate work on the server side or a DPOW service
+	// Generate work on the server side or with a DPOW service
 	work: '0000000000000000',
 }
 
@@ -168,7 +168,7 @@ const converted = converter.convert('1000000000000000000000000000000', 'RAW', 'N
 ### In web
 
 ```
-<script src="https://unpkg.com/nanocurrency-web@1.0.3" type="text/javascript"></script>
+<script src="https://unpkg.com/nanocurrency-web@1.0.5" type="text/javascript"></script>
 <scrypt type="text/javascript">
 	NanocurrencyWeb.wallet.generate(...);
 </script>

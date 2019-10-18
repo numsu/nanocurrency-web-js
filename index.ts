@@ -1,6 +1,6 @@
 import AddressGenerator from './lib/address-generator'
 import AddressImporter, { Account, Wallet } from './lib/address-importer'
-import BlockSigner, { TransactionBlock, RepresentativeBlock, SignedBlock } from './lib/block-signer'
+import BlockSigner, { SendBlock, ReceiveBlock, RepresentativeBlock, SignedBlock } from './lib/block-signer'
 import BigNumber from 'bignumber.js'
 import NanoConverter from './lib/nano-converter'
 
@@ -92,7 +92,8 @@ const block = {
 	/**
 	 * Sign a send block with the input parameters
 	 *
-	 * For a receive block, put your own address to the 'toAddress' property.
+	 * For a send block, put your own address to the 'fromAddress' property and
+	 * the recipient address to the 'toAddress' property.
 	 * All the NANO amounts should be input in RAW format. The addresses should be
 	 * valid Nano addresses. Fetch the current balance, frontier (previous block) and
 	 * representative address from the blockchain and generate work for the signature.
@@ -105,9 +106,32 @@ const block = {
 	 * @param {SendBlock} data The data for the block
 	 * @param {string} privateKey Private key to sign the block
 	 */
-	sign: (data: TransactionBlock, privateKey: string): SignedBlock => {
-		return blockSigner.sign(data, privateKey)
+	send: (data: SendBlock, privateKey: string): SignedBlock => {
+		return blockSigner.send(data, privateKey)
 	},
+
+
+	/**
+	 * Sign a receive block with the input parameters
+	 *
+	 * For a receive block, put your own address to the 'toAddress' property.
+	 * All the NANO amounts should be input in RAW format. The addresses should be
+	 * valid Nano addresses. Fetch the current balance, frontier (previous block) and
+	 * representative address from the blockchain and generate work for the signature.
+	 * Input the receive amount and transaction hash from the pending block.
+	 *
+	 * The return value of this function is ready to be published to the blockchain.
+	 *
+	 * NOTICE: Always fetch up-to-date account info from the blockchain
+	 *         before signing the block
+	 *
+	 * @param {ReceiveBlock} data The data for the block
+	 * @param {string} privateKey Private key to sign the block
+	 */
+	receive: (data: ReceiveBlock, privateKey: string): SignedBlock => {
+		return blockSigner.receive(data, privateKey)
+	},
+
 
 	/**
 	 * Sign a representative change block with the input parameters
@@ -126,14 +150,14 @@ const block = {
 	 *
 	 */
 	representative: (data: RepresentativeBlock, privateKey: string): SignedBlock => {
-		const block: TransactionBlock = {
+		const block: SendBlock = {
 			...data,
 			fromAddress: data.address,
 			amountRaw: '0',
-			toAddress: 'nano_1111111111111111111111111111111111111111111111111111hifc8npp' // Burn address
+			toAddress: 'nano_1111111111111111111111111111111111111111111111111111hifc8npp', // Burn address
 		}
 
-		return blockSigner.sign(block, privateKey)
+		return blockSigner.send(block, privateKey)
 	},
 
 }
