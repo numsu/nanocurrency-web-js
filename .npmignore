@@ -1,10 +1,11 @@
 .git/
 node_modules/
 test/
-src/
+lib/
 .gitignore
 .editorconfig
 .travis.yml
-webpack.config.json
+webpack.config.js
 tsconfig.json
 package-lock.json
+index.ts
