@@ -13,7 +13,13 @@ export default class Bip39Mnemonic {
 		this.password = password
 	}
 
-	createWallet = (entropy: string): { mnemonic: string, seed: string } => {
+	/**
+	 * Creates a new wallet
+	 * 
+	 * @param {string} [entropy] - (Optional) the entropy to use instead of generating
+	 * @returns {MnemonicSeed} The mnemonic phrase and a seed derived from the (generated) entropy
+	 */
+	createWallet = (entropy: string): MnemonicSeed => {
 		if (entropy) {
 			if (entropy.length !== 64) {
 				throw new Error('Invalid entropy length, must be a 64 byte hexadecimal string')
@@ -45,6 +51,12 @@ export default class Bip39Mnemonic {
 		}
 	}
 
+	/**
+	 * Validates a mnemonic phrase
+	 * 
+	 * @param {string} mnemonic - The mnemonic phrase to validate
+	 * @returns {boolean} Is the mnemonic phrase valid
+	 */
 	validateMnemonic = (mnemonic: string): boolean => {
 		const wordArray = Util.normalizeUTF8(mnemonic).split(' ')
 		if (wordArray.length % 3 !== 0) {
@@ -103,4 +115,9 @@ export default class Bip39Mnemonic {
 		return entropySha256.substr(0, entropySha256.length / 32)
 	}
 
+}
+
+interface MnemonicSeed {
+	mnemonic: string,
+	seed: string,
 }

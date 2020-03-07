@@ -1,7 +1,7 @@
 'use strict'
 
 const expect = require('chai').expect
-const { wallet, block, converter } = require('../dist/index')
+const { wallet, block, tools } = require('../dist/index')
 
 // WARNING: Do not send any funds to the test vectors below
 describe('generate wallet test', () => {
@@ -158,13 +158,27 @@ describe('block signing tests using official test vectors', () => {
 describe('unit conversion tests', () => {
 
 	it('should convert nano to raw', () => {
-		const result = converter.convert('1', 'NANO', 'RAW')
+		const result = tools.convert('1', 'NANO', 'RAW')
 		expect(result).to.equal('1000000000000000000000000000000')
 	})
 
 	it('should convert raw to nano', () => {
-		const result = converter.convert('1000000000000000000000000000000', 'RAW', 'NANO')
+		const result = tools.convert('1000000000000000000000000000000', 'RAW', 'NANO')
 		expect(result).to.equal('1.000000000000000')
+	})
+
+})
+
+describe('Signer tests', () => {
+
+	it('should sign data with a single parameter', () => {
+		const result = tools.sign('781186FB9EF17DB6E3D1056550D9FAE5D5BBADA6A6BC370E4CBB938B1DC71DA3', 'miro@metsanheimo.fi')
+		expect(result).to.equal('0ede9f287b7d58a053aa9ad84419c856ac39ec4c2453098ef19abf9638b07b1993e0cd3747723aada71602e92e781060dc3b91c410d32def1b4780a62fd0eb02')
+	})
+
+	it('should sign data with multiple parameters', () => {
+		const result = tools.sign('781186FB9EF17DB6E3D1056550D9FAE5D5BBADA6A6BC370E4CBB938B1DC71DA3', 'miro@metsanheimo.fi', 'somePassword')
+		expect(result).to.equal('a7b88357a160f54cf4db2826c86483eb60e66e8ccb36f9a37f3fb636c9d80f7b59d1fba88d0be27f85ac3fcbe5c6e13f911d7e5b713e86fb8e9a635932a2af05')
 	})
 
 })

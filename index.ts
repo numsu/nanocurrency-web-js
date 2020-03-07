@@ -3,9 +3,12 @@ import AddressImporter, { Account, Wallet } from './lib/address-importer'
 import BlockSigner, { SendBlock, ReceiveBlock, RepresentativeBlock, SignedBlock } from './lib/block-signer'
 import BigNumber from 'bignumber.js'
 import NanoConverter from './lib/nano-converter'
+import Signer from './lib/signer'
+import Convert from './lib/util/convert'
 
 const generator = new AddressGenerator()
 const importer = new AddressImporter()
+const signer = new Signer();
 const wallet = {
 
 	/**
@@ -162,7 +165,7 @@ const block = {
 
 }
 
-const converter = {
+const tools = {
 
 	/**
 	 * Convert Nano values
@@ -173,8 +176,19 @@ const converter = {
 	 * @param {string} inputUnit The unit of the input value
 	 * @param {string} outputUnit The unit you wish to convert to
 	 */
-	convert: (input: string | BigNumber, inputUnit: string, outputUnit: string) => {
+	convert: (input: string | BigNumber, inputUnit: string, outputUnit: string): string => {
 		return NanoConverter.convert(input, inputUnit, outputUnit)
+	},
+
+	/**
+	 * Sign any strings with the user's private key
+	 * 
+	 * @param {string} privateKey The private key to sign with
+	 * @param {...string} input Data to sign
+	 */
+	sign: (privateKey: string, ...input: string[]): string => {
+		const data = input.map(Convert.stringToHex)
+		return signer.sign(privateKey, ...data);
 	},
 
 }
@@ -182,5 +196,5 @@ const converter = {
 export {
 	wallet,
 	block,
-	converter,
+	tools,
 }

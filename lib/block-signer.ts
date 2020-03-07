@@ -1,19 +1,28 @@
-import BigNumber from 'bignumber.js'
 import Ed25519 from './ed25519'
 import Convert from './util/convert'
 import NanoAddress from './nano-address'
 import NanoConverter from './nano-converter'
+import Signer from './signer'
 
+import BigNumber from 'bignumber.js'
 //@ts-ignore
-import { blake2b, blake2bInit, blake2bUpdate, blake2bFinal } from 'blakejs'
+import { blake2b } from 'blakejs'
 
 export default class BlockSigner {
 
 	nanoAddress = new NanoAddress()
 	ed25519 = new Ed25519()
+	signer = new Signer()
 
-	preamble = 0x6.toString().padStart(64, '0')
+	preamble: string = 0x6.toString().padStart(64, '0')
 
+	/**
+	 * Sign a receive block
+	 * 
+	 * @param {ReceiveBlock} data The data required to sign a receive block
+	 * @param {string} privateKey Private key to sign the data with
+	 * @returns {SignedBlock} the signed block to publish to the blockchain
+	 */
 	receive(data: ReceiveBlock, privateKey: string): SignedBlock {
 		const validateInputRaw = (input: string) => !!input && !isNaN(+input)
 		if (!validateInputRaw(data.walletBalanceRaw)) {
@@ -57,9 +66,14 @@ export default class BlockSigner {
 		const link = data.transactionHash
 		const representative = this.nanoAddressToHexString(data.representativeAddress)
 
-		const signatureBytes = this.ed25519.sign(
-			this.generateHash(this.preamble, account, data.frontier, representative, newBalanceHex, link),
-			Convert.hex2ab(privateKey))
+		const signature = this.signer.sign(
+				privateKey,
+				this.preamble,
+				account,
+				data.frontier,
+				representative,
+				newBalanceHex,
+				link)
 
 		return {
 			type: 'state',
@@ -68,11 +82,18 @@ export default class BlockSigner {
 			representative: data.representativeAddress,
 			balance: newBalanceRaw,
 			link: link,
-			signature: Convert.ab2hex(signatureBytes),
+			signature: signature,
 			work: data.work,
 		}
 	}
 
+	/**
+	 * Sign a send block
+	 * 
+	 * @param {SendBlock} data The data required to sign a send block
+	 * @param {string} privateKey Private key to sign the data with
+	 * @returns {SignedBlock} the signed block to publish to the blockchain
+	 */
 	send(data: SendBlock, privateKey: string): SignedBlock {
 		const validateInputRaw = (input: string) => !!input && !isNaN(+input)
 		if (!validateInputRaw(data.walletBalanceRaw)) {
@@ -96,11 +117,11 @@ export default class BlockSigner {
 		}
 
 		if (!data.frontier) {
-			throw new Error('No frontier')
+			throw new Error('Frontier is not set')
 		}
 
 		if (!data.work) {
-			throw new Error('No work')
+			throw new Error('Work is not set')
 		}
 
 		if (!privateKey) {
@@ -116,9 +137,14 @@ export default class BlockSigner {
 		const link = this.nanoAddressToHexString(data.toAddress)
 		const representative = this.nanoAddressToHexString(data.representativeAddress)
 
-		const signatureBytes = this.ed25519.sign(
-			this.generateHash(this.preamble, account, data.frontier, representative, newBalanceHex, link),
-			Convert.hex2ab(privateKey))
+		const signature = this.signer.sign(
+				privateKey,
+				this.preamble,
+				account,
+				data.frontier,
+				representative,
+				newBalanceHex,
+				link)
 
 		return {
 			type: 'state',
@@ -127,20 +153,9 @@ export default class BlockSigner {
 			representative: data.representativeAddress,
 			balance: newBalanceRaw,
 			link: link,
-			signature: Convert.ab2hex(signatureBytes),
+			signature: signature,
 			work: data.work,
 		}
-	}
-
-	private generateHash(preamble: string, account: string, previous: string, representative: string, balance: string, link: string) {
-		const ctx = blake2bInit(32, undefined)
-		blake2bUpdate(ctx, Convert.hex2ab(preamble))
-		blake2bUpdate(ctx, Convert.hex2ab(account))
-		blake2bUpdate(ctx, Convert.hex2ab(previous))
-		blake2bUpdate(ctx, Convert.hex2ab(representative))
-		blake2bUpdate(ctx, Convert.hex2ab(balance))
-		blake2bUpdate(ctx, Convert.hex2ab(link))
-		return blake2bFinal(ctx)
 	}
 
 	private nanoAddressToHexString(addr: string): string {
@@ -154,9 +169,9 @@ export default class BlockSigner {
 				const key = Convert.ab2hex(keyBytes).toUpperCase()
 				return key
 			}
-			throw new Error('Checksum mismatch')
+			throw new Error('Checksum mismatch in address')
 		} else {
-			throw new Error('Illegal characters')
+			throw new Error('Illegal characters in address')
 		}
 	}
 

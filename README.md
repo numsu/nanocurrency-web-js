@@ -165,19 +165,31 @@ const signedBlock = block.representative(data, privateKey)
 Supported unit values are RAW, NANO, MRAI, KRAI, RAW.
 
 ```javascript
-import { converter } from 'nanocurrency-web'
+import { tools } from 'nanocurrency-web'
 
 // Convert 1 Nano to RAW
-const converted = converter.convert('1', 'NANO', 'RAW')
+const converted = tools.convert('1', 'NANO', 'RAW')
 
 // Convert 1 RAW to Nano
-const converted = converter.convert('1000000000000000000000000000000', 'RAW', 'NANO')
+const converted = tools.convert('1000000000000000000000000000000', 'RAW', 'NANO')
 ```
+
+#### Signing any data with the private key
+
+For example implementing client side login with the password being the user's e-mail signed with their private key
+
+```javascript
+import { tools } from 'nanocurrency-web'
+
+const privateKey = '781186FB9EF17DB6E3D1056550D9FAE5D5BBADA6A6BC370E4CBB938B1DC71DA3';
+const signed = tools.sign(privateKey, 'foo@bar.com')
+```
+
 
 ### In web
 
 ```html
-<script src="https://unpkg.com/nanocurrency-web@1.0.6" type="text/javascript"></script>
+<script src="https://unpkg.com/nanocurrency-web@1.1.0" type="text/javascript"></script>
 <script type="text/javascript">
     NanocurrencyWeb.wallet.generate(...);
 </script>

@@ -5,6 +5,13 @@ import NanoAddress from './nano-address'
 
 export default class AddressImporter {
 
+	/**
+	 * Import a wallet using a mnemonic phrase
+	 * 
+	 * @param {string} mnemonic - The mnemonic words to import the wallet from 
+	 * @param {string} [seedPassword] - (Optional) The password to use to secure the mnemonic
+	 * @returns {Wallet} - The wallet derived from the mnemonic phrase
+	 */
 	fromMnemonic(mnemonic: string, seedPassword = ''): Wallet {
 		const bip39 = new Bip39Mnemonic(seedPassword)
 		if (!bip39.validateMnemonic(mnemonic)) {
@@ -15,6 +22,14 @@ export default class AddressImporter {
 		return this.nano(seed, 0, 0, mnemonic)
 	}
 
+	/**
+	 * Import a wallet using a seed
+	 * 
+	 * @param {string} seed - The seed to import the wallet from 
+	 * @param {number} [from] - (Optional) The start index of the private keys to derive from
+	 * @param {number} [to] - (Optional) The end index of the private keys to derive to
+	 * @returns {Wallet} The wallet derived from the mnemonic phrase
+	 */
 	fromSeed(seed: string, from = 0, to = 0): Wallet {
 		if (seed.length !== 128) {
 			throw new Error('Invalid seed length, must be a 128 byte hexadecimal string')
@@ -27,8 +42,12 @@ export default class AddressImporter {
 	}
 
 	/**
-	 * Generates the wallet
-	 * @param {String} seedPassword Password for the seed
+	 * Derives the private keys
+	 * 
+	 * @param {string} seed - The seed to use for private key derivation
+	 * @param {number} from - The start index of private keys to derive from
+	 * @param {number} to - The end index of private keys to derive to
+	 * @param {string} [mnemonic] - (Optional) the mnemonic phrase to return with the wallet
 	 */
 	private nano(seed: string, from: number, to: number, mnemonic?: string): Wallet {
 		const accounts = []

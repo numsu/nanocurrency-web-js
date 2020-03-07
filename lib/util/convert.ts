@@ -105,4 +105,8 @@ export default class Convert {
 		return parseInt(bin, 2).toString(16)
 	}
 
+	static stringToHex = (str: string): string => {
+		return [...str].map(c => c.charCodeAt(0).toString(16)).join('')
+	}
+
 }
