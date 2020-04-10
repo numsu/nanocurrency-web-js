@@ -17,6 +17,7 @@ The toolkit supports creating and importing wallets and signing blocks on-device
 * Sign send, receive and change representative blocks with a private key
 * Runs in all web browsers and mobile frameworks built with Javascript
 * Convert Nano units
+* Sign any strings with the private key, for example using a password for the user created from the user ID.
 
 ---
 
