@@ -189,7 +189,7 @@ const signed = tools.sign(privateKey, 'foo@bar.com')
 ### In web
 
 ```html
-<script src="https://unpkg.com/nanocurrency-web@1.1.0" type="text/javascript"></script>
+<script src="https://unpkg.com/nanocurrency-web@1.1.1" type="text/javascript"></script>
 <script type="text/javascript">
     NanocurrencyWeb.wallet.generate(...);
 </script>
