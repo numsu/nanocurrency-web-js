@@ -14,6 +14,7 @@ The toolkit supports creating and importing wallets and signing blocks on-device
 * BIP39/44 private key derivation
 * Mnemonic is compatible with the Ledger Nano implementation
 * Import wallets with a mnemonic phrase or a seed
+* Import wallets with the legacy Nano hex seed
 * Sign send, receive and change representative blocks with a private key
 * Runs in all web browsers and mobile frameworks built with Javascript
 * Convert Nano units
@@ -48,12 +49,18 @@ const wallet = wallet.fromMnemonic(mnemonic, seedPassword?)
 // Import a wallet with a seed
 const wallet = wallet.fromSeed(seed)
 
+// Import a wallet with a legacy hex seed
+const wallet = wallet.fromLegacySeed(seed)
+
 // Derive private keys for a seed, from and to are number indexes
 const accounts = wallet.accounts(seed, from, to)
+
+// Derive private keys for a legacy seed, from and to are number indexes
+const accounts = wallet.legacyAccounts(seed, from, to)
 ```
 
 ```javascript
-// The returned wallet JSON format is as follows:
+// The returned wallet JSON format is as follows. The mnemonic phrase will be undefined when importing with a seed.
 {
     mnemonic: 'edge defense waste choose enrich upon flee junk siren film clown finish luggage leader kid quick brick print evidence swap drill paddle truly occur',
     seed: '0dc285fde768f7ff29b66ce7252d56ed92fe003b605907f7a4f683c3dc8586d34a914d3c71fc099bb38ee4a59e5b081a3497b7a323e90cc68f67b5837690310c',
@@ -177,7 +184,7 @@ const converted = tools.convert('1000000000000000000000000000000', 'RAW', 'NANO'
 
 #### Signing any data with the private key
 
-For example implementing client side login with the password being the user's e-mail signed with their private key
+For example implementing client side login with the password being the user's e-mail signed with their private key. Make sure that you double check the signature on the back-end side with the public key.
 
 ```javascript
 import { tools } from 'nanocurrency-web'
@@ -190,7 +197,7 @@ const signed = tools.sign(privateKey, 'foo@bar.com')
 ### In web
 
 ```html
-<script src="https://unpkg.com/nanocurrency-web@1.1.1" type="text/javascript"></script>
+<script src="https://unpkg.com/nanocurrency-web@1.2.0" type="text/javascript"></script>
 <script type="text/javascript">
     NanocurrencyWeb.wallet.generate(...);
 </script>

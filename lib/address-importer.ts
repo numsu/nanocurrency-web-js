@@ -2,6 +2,8 @@ import Bip32KeyDerivation from './bip32-key-derivation'
 import Bip39Mnemonic from './bip39-mnemonic'
 import Ed25519 from './ed25519'
 import NanoAddress from './nano-address'
+import Signer from './signer'
+import Convert from './util/convert'
 
 export default class AddressImporter {
 
@@ -40,6 +42,43 @@ export default class AddressImporter {
 
 		return this.nano(seed, from, to, undefined)
 	}
+	
+
+	/**
+	 * Import a wallet using a legacy seed
+	 * 
+	 * @param {string} seed - The seed to import the wallet from
+	 * @param {number} [from] - (Optional) The start index of the private keys to derive from
+	 * @param {number} [to] - (Optional) The end index of the private keys to derive to
+	 * @returns {Wallet} The wallet derived from the seed
+	 */
+	fromLegacySeed(seed: string, from: number = 0, to: number = 0): Wallet {
+		const signer = new Signer()
+
+		const accounts: Account[] = []
+		for (let i = from; i <= to; i++) {
+			const privateKey = Convert.ab2hex(signer.generateHash([seed, Convert.dec2hex(i, 4)]))
+
+			const ed25519 = new Ed25519()
+			const keyPair = ed25519.generateKeys(privateKey)
+
+			const nano = new NanoAddress()
+			const address = nano.deriveAddress(keyPair.publicKey)
+
+			accounts.push({
+				accountIndex: i,
+				privateKey: keyPair.privateKey,
+				publicKey: keyPair.publicKey,
+				address,
+			})
+		}
+
+		return {
+			mnemonic: undefined,
+			seed,
+			accounts,
+		}
+	}
 
 	/**
 	 * Derives the private keys
@@ -61,6 +100,7 @@ export default class AddressImporter {
 
 			const nano = new NanoAddress()
 			const address = nano.deriveAddress(keyPair.publicKey)
+
 			accounts.push({
 				accountIndex: i,
 				privateKey: keyPair.privateKey,

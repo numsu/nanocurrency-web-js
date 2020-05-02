@@ -28,8 +28,8 @@ const wallet = {
 	 * An optional seed password can be used to encrypt the mnemonic phrase so the seed
 	 * cannot be derived correctly without the password. Recovering the password is not possible.
 	 *
-	 * @param {string} [entropy] Optional 64 byte hexadecimal string entropy to be used instead of the default
-	 * @param {string} [seedPassword] Optional seed password
+	 * @param {string} [entropy] - (Optional) 64 byte hexadecimal string entropy to be used instead of the default
+	 * @param {string} [seedPassword] - (Optional) seed password
 	 * @returns the generated mnemonic, seed and account
 	 */
 	generate: (entropy?: string, seedPassword?: string): Wallet => {
@@ -46,10 +46,10 @@ const wallet = {
 	 * The Nano address is derived from the public key using standard Nano encoding.
 	 * The address is prefixed with 'nano_'.
 	 *
-	 * @param {string} mnemonic The mnemonic phrase. Words are separated with a space
-	 * @param {string} [seedPassword] Optional seed password
+	 * @param {string} mnemonic - The mnemonic phrase. Words are separated with a space
+	 * @param {string} [seedPassword] - (Optional) seed password
 	 * @throws Throws an error if the mnemonic phrase doesn't pass validations
-	 * @returns the imported mnemonic, seed and account
+	 * @returns the wallet derived from the mnemonic (mnemonic, seed, account)
 	 */
 	fromMnemonic: (mnemonic: string, seedPassword?: string): Wallet => {
 		return importer.fromMnemonic(mnemonic, seedPassword)
@@ -65,11 +65,29 @@ const wallet = {
 	 * The Nano address is derived from the public key using standard Nano encoding.
 	 * The address is prefixed with 'nano_'.
 	 *
-	 * @param {string} seed The seed
-	 * @returns the importes seed and account
+	 * @param {string} seed - The seed
+	 * @returns {Wallet} the wallet derived from the seed (seed, account)
 	 */
 	fromSeed: (seed: string): Wallet => {
 		return importer.fromSeed(seed)
+	},
+
+	/**
+	 * Import Nano cryptocurrency accounts from a legacy hex seed
+	 * 
+	 * This function imports a wallet from a seed. The private key is derived from the seed using
+	 * simply a blake2b hash function. The public key is derived from the private key using the ed25519 curve
+	 * algorithm.
+	 * 
+	 * The Nano address is derived from the public key using standard Nano encoding.
+	 * The address is prefixed with 'nano_'.
+	 * 
+	 * @param {string} seed - The seed
+	 * @returns the wallet derived from the seed (seed, account)
+	 * 
+	 */
+	fromLegacySeed: (seed: string): Wallet => {
+		return importer.fromLegacySeed(seed);
 	},
 
 	/**
@@ -79,12 +97,26 @@ const wallet = {
 	 * from the given seed with input parameters 44'/165' and indexes based on the from and to
 	 * parameters.
 	 *
-	 * @param {string} seed The seed
-	 * @param {number} from The start index
-	 * @param {number} to The end index
+	 * @param {string} seed - The seed
+	 * @param {number} from - The start index
+	 * @param {number} to - The end index
 	 */
 	accounts: (seed: string, from: number, to: number): Account[] => {
 		return importer.fromSeed(seed, from, to).accounts
+	},
+
+	/**
+	 * Derive accounts for the legacy hex seed
+	 *
+	 * This function derives Nano accounts with the given seed with indexes
+	 * based on the from and to parameters.
+	 *
+	 * @param {string} seed - The seed
+	 * @param {number} from - The start index
+	 * @param {number} to - The end index
+	 */
+	legacyAccounts: (seed: string, from: number, to: number): Account[] => {
+		return importer.fromLegacySeed(seed, from, to).accounts
 	},
 
 }

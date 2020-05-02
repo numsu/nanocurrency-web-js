@@ -85,6 +85,31 @@ describe('import wallet with official test vectors test', () => {
 		expect(result.accounts[0].address).to.equal('nano_1pu7p5n3ghq1i1p4rhmek41f5add1uh34xpb94nkbxe8g4a6x1p69emk8y1d')
 	})
 
+	it('should successfully import a legacy hex wallet with the a seed', () => {
+		const result = wallet.fromLegacySeed('0000000000000000000000000000000000000000000000000000000000000000')
+		expect(result).to.have.own.property('mnemonic')
+		expect(result).to.have.own.property('seed')
+		expect(result).to.have.own.property('accounts')
+		expect(result.mnemonic).to.be.undefined
+		expect(result.seed).to.equal('0000000000000000000000000000000000000000000000000000000000000000')
+		expect(result.accounts[0].privateKey).to.equal('9f0e444c69f77a49bd0be89db92c38fe713e0963165cca12faf5712d7657120f')
+		expect(result.accounts[0].publicKey).to.equal('c008b814a7d269a1fa3c6528b19201a24d797912db9996ff02a1ff356e45552b')
+		expect(result.accounts[0].address).to.equal('nano_3i1aq1cchnmbn9x5rsbap8b15akfh7wj7pwskuzi7ahz8oq6cobd99d4r3b7')
+	})
+
+	it('should successfully import legacy hex accounts with the a seed', () => {
+		const accounts = wallet.legacyAccounts('0000000000000000000000000000000000000000000000000000000000000000', 0, 3)
+		expect(accounts[0]).to.have.own.property('accountIndex')
+		expect(accounts[0]).to.have.own.property('privateKey')
+		expect(accounts[0]).to.have.own.property('publicKey')
+		expect(accounts[0]).to.have.own.property('address')
+		expect(accounts).to.have.lengthOf(4)
+		expect(accounts[2].accountIndex).to.equal(2)
+		expect(accounts[2].privateKey).to.equal('6a1804198020b080996ba45b5891f8227d7a4f41c8479824423780d234939d58')
+		expect(accounts[2].publicKey).to.equal('2fea520fe54f5d0dca79d553d9c7f5af7db6ac17586dbca6905794caadc639df')
+		expect(accounts[2].address).to.equal('nano_1dzcca9ycmtx3q79mocmu95zdduxptp3gp5fqkmb1ownscpweggzah8cb4rb')
+	})
+
 	it('should throw when given a seed with an invalid length', () => {
 		expect(() => wallet.generate('0dc285fde768f7ff29b66ce7252d56ed92fe003b605907f7a4f683c3dc8586d34a914d3c71fc099bb38ee4a59e5b081a3497b7a323e90cc68f67b5837690310')).to.throw(Error)
 		expect(() => wallet.generate('0dc285fde768f7ff29b66ce7252d56ed92fe003b605907f7a4f683c3dc8586d34a914d3c71fc099bb38ee4a59e5b081a3497b7a323e90cc68f67b5837690310cd')).to.throw(Error)

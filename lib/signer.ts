@@ -26,7 +26,7 @@ export default class Signer {
 	 * 
 	 * @param data Data to hash
 	 */
-	private generateHash(data: string[]): Uint8Array {
+	generateHash(data: string[]): Uint8Array {
 		const ctx = blake2bInit(32, undefined)
 		data.forEach(str => blake2bUpdate(ctx, Convert.hex2ab(str)))
 		return blake2bFinal(ctx)
