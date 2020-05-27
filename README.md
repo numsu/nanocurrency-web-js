@@ -19,6 +19,7 @@ The toolkit supports creating and importing wallets and signing blocks on-device
 * Runs in all web browsers and mobile frameworks built with Javascript
 * Convert Nano units
 * Sign any strings with the private key, for example using a password for the user created from the user ID.
+* Validate addresses and mnemonic words
 
 ---
 
@@ -189,15 +190,27 @@ For example implementing client side login with the password being the user's e-
 ```javascript
 import { tools } from 'nanocurrency-web'
 
-const privateKey = '781186FB9EF17DB6E3D1056550D9FAE5D5BBADA6A6BC370E4CBB938B1DC71DA3';
+const privateKey = '781186FB9EF17DB6E3D1056550D9FAE5D5BBADA6A6BC370E4CBB938B1DC71DA3'
 const signed = tools.sign(privateKey, 'foo@bar.com')
+```
+
+#### Validating values
+
+```javascript
+import { tools } from 'nanocurrency-web'
+
+// Validate Nano address
+const valid = tools.validateAddress('nano_1pu7p5n3ghq1i1p4rhmek41f5add1uh34xpb94nkbxe8g4a6x1p69emk8y1d')
+
+// Validate mnemonic words
+const valid = tools.validateMnemonic('edge defense waste choose enrich upon flee junk siren film clown finish luggage leader kid quick brick print evidence swap drill paddle truly occur')
 ```
 
 
 ### In web
 
 ```html
-<script src="https://unpkg.com/nanocurrency-web@1.2.0" type="text/javascript"></script>
+<script src="https://unpkg.com/nanocurrency-web@1.2.1" type="text/javascript"></script>
 <script type="text/javascript">
     NanocurrencyWeb.wallet.generate(...);
 </script>

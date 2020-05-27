@@ -1,21 +1,21 @@
+//@ts-ignore
+import { PBKDF2, SHA256, algo, enc, lib } from 'crypto-js'
+
 import Convert from './util/convert'
 import Util from './util/util'
 import words from './words'
-
-//@ts-ignore
-import { algo, enc, lib, PBKDF2, SHA256 } from 'crypto-js'
 
 export default class Bip39Mnemonic {
 
 	password: string
 
-	constructor(password: string) {
+	constructor(password?: string) {
 		this.password = password
 	}
 
 	/**
 	 * Creates a new wallet
-	 * 
+	 *
 	 * @param {string} [entropy] - (Optional) the entropy to use instead of generating
 	 * @returns {MnemonicSeed} The mnemonic phrase and a seed derived from the (generated) entropy
 	 */
@@ -53,7 +53,7 @@ export default class Bip39Mnemonic {
 
 	/**
 	 * Validates a mnemonic phrase
-	 * 
+	 *
 	 * @param {string} mnemonic - The mnemonic phrase to validate
 	 * @returns {boolean} Is the mnemonic phrase valid
 	 */
@@ -84,7 +84,7 @@ export default class Bip39Mnemonic {
 		const newChecksum = this.calculateChecksum(entropyHex)
 		const inputChecksum = Convert.binaryToHexString(checksumBits)
 
-		if (newChecksum != inputChecksum) {
+		if (parseInt(newChecksum, 16) != parseInt(inputChecksum, 16)) {
 			return false
 		}
 

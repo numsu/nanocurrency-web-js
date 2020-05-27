@@ -1,14 +1,18 @@
+import BigNumber from 'bignumber.js'
+
 import AddressGenerator from './lib/address-generator'
 import AddressImporter, { Account, Wallet } from './lib/address-importer'
-import BlockSigner, { SendBlock, ReceiveBlock, RepresentativeBlock, SignedBlock } from './lib/block-signer'
-import BigNumber from 'bignumber.js'
+import BlockSigner, { ReceiveBlock, RepresentativeBlock, SendBlock, SignedBlock } from './lib/block-signer'
+import NanoAddress from './lib/nano-address'
 import NanoConverter from './lib/nano-converter'
 import Signer from './lib/signer'
 import Convert from './lib/util/convert'
 
+const nanoAddress = new NanoAddress()
 const generator = new AddressGenerator()
 const importer = new AddressImporter()
-const signer = new Signer();
+const signer = new Signer()
+
 const wallet = {
 
 	/**
@@ -74,17 +78,17 @@ const wallet = {
 
 	/**
 	 * Import Nano cryptocurrency accounts from a legacy hex seed
-	 * 
+	 *
 	 * This function imports a wallet from a seed. The private key is derived from the seed using
 	 * simply a blake2b hash function. The public key is derived from the private key using the ed25519 curve
 	 * algorithm.
-	 * 
+	 *
 	 * The Nano address is derived from the public key using standard Nano encoding.
 	 * The address is prefixed with 'nano_'.
-	 * 
+	 *
 	 * @param {string} seed - The seed
 	 * @returns the wallet derived from the seed (seed, account)
-	 * 
+	 *
 	 */
 	fromLegacySeed: (seed: string): Wallet => {
 		return importer.fromLegacySeed(seed);
@@ -214,13 +218,31 @@ const tools = {
 
 	/**
 	 * Sign any strings with the user's private key
-	 * 
+	 *
 	 * @param {string} privateKey The private key to sign with
 	 * @param {...string} input Data to sign
 	 */
 	sign: (privateKey: string, ...input: string[]): string => {
 		const data = input.map(Convert.stringToHex)
 		return signer.sign(privateKey, ...data);
+	},
+
+	/**
+	 * Validate a Nano address
+	 *
+	 * @param {string} input The address to validate
+	 */
+	validateAddress: (input: string): boolean => {
+		return nanoAddress.validateNanoAddress(input);
+	},
+
+	/**
+	 * Validate mnemonic words
+	 *
+	 * @param {string} input The address to validate
+	 */
+	validateMnemonic: (input: string): boolean => {
+		return importer.validateMnemonic(input);
 	},
 
 }

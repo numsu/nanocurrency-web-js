@@ -9,8 +9,8 @@ export default class AddressImporter {
 
 	/**
 	 * Import a wallet using a mnemonic phrase
-	 * 
-	 * @param {string} mnemonic - The mnemonic words to import the wallet from 
+	 *
+	 * @param {string} mnemonic - The mnemonic words to import the wallet from
 	 * @param {string} [seedPassword] - (Optional) The password to use to secure the mnemonic
 	 * @returns {Wallet} - The wallet derived from the mnemonic phrase
 	 */
@@ -25,9 +25,19 @@ export default class AddressImporter {
 	}
 
 	/**
+	 * Validate mnemonic words
+	 *
+	 * @param mnemonic {string} mnemonic - The mnemonic words to validate
+	 */
+	validateMnemonic(mnemonic: string): boolean {
+		const bip39 = new Bip39Mnemonic()
+		return bip39.validateMnemonic(mnemonic);
+	}
+
+	/**
 	 * Import a wallet using a seed
-	 * 
-	 * @param {string} seed - The seed to import the wallet from 
+	 *
+	 * @param {string} seed - The seed to import the wallet from
 	 * @param {number} [from] - (Optional) The start index of the private keys to derive from
 	 * @param {number} [to] - (Optional) The end index of the private keys to derive to
 	 * @returns {Wallet} The wallet derived from the mnemonic phrase
@@ -42,11 +52,11 @@ export default class AddressImporter {
 
 		return this.nano(seed, from, to, undefined)
 	}
-	
+
 
 	/**
 	 * Import a wallet using a legacy seed
-	 * 
+	 *
 	 * @param {string} seed - The seed to import the wallet from
 	 * @param {number} [from] - (Optional) The start index of the private keys to derive from
 	 * @param {number} [to] - (Optional) The end index of the private keys to derive to
@@ -82,7 +92,7 @@ export default class AddressImporter {
 
 	/**
 	 * Derives the private keys
-	 * 
+	 *
 	 * @param {string} seed - The seed to use for private key derivation
 	 * @param {number} from - The start index of private keys to derive from
 	 * @param {number} to - The end index of private keys to derive to

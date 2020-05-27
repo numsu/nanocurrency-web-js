@@ -1,7 +1,7 @@
-import Convert from './util/convert'
-
 //@ts-ignore
 import { blake2b } from 'blakejs'
+
+import Convert from './util/convert'
 
 export default class NanoAddress {
 
@@ -82,43 +82,29 @@ export default class NanoAddress {
 	 * @param {string} address Nano address
 	 */
 	validateNanoAddress = (address: string): boolean => {
-		/** Ensure the address is provided */
 		if (address === undefined) {
 			throw Error('Address must be defined.')
 		}
 
-		/** Ensure the address is a string */
 		if (typeof address !== 'string') {
 			throw TypeError('Address must be a string.')
 		}
 
-		/** The array of allowed prefixes */
 		const allowedPrefixes: string[] = ['nano', 'xrb']
-
-		/** The regex pattern for validating the address */
 		const pattern = new RegExp(
 			`^(${allowedPrefixes.join('|')})_[13]{1}[13456789abcdefghijkmnopqrstuwxyz]{59}$`,
 		)
 
-		/** Validate the syntax of the address */
-		if (!pattern.test(address)) return false
+		if (!pattern.test(address)) {
+			return false
+		}
 
-		/** The expected checksum as a base32-encoded string */
 		const expectedChecksum = address.slice(-8)
-
-		/** The public key as a base32-encoded string */
 		const publicKey = address.slice(address.indexOf('_') + 1, -8)
-
-		/** The public key as an array buffer */
 		const publicKeyBuffer = this.decodeNanoBase32(publicKey)
-
-		/** The actual checksum as an array buffer */
 		const actualChecksumBuffer = blake2b(publicKeyBuffer, null, 5).reverse()
-
-		/** The actual checksum as a base32-encoded string */
 		const actualChecksum = this.encodeNanoBase32(actualChecksumBuffer)
 
-		/** Validate the provided checksum against the derived checksum */
 		return expectedChecksum === actualChecksum
 	}
 

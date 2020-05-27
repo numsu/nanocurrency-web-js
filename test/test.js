@@ -57,7 +57,7 @@ describe('generate wallet test', () => {
 })
 
 // Test vectors from https://docs.nano.org/integration-guides/key-management/
-describe('import wallet with official test vectors test', () => {
+describe('import wallet with test vectors test', () => {
 
 	it('should successfully import a wallet with the official Nano test vectors mnemonic', () => {
 		const result = wallet.fromMnemonic(
@@ -71,6 +71,10 @@ describe('import wallet with official test vectors test', () => {
 		expect(result.accounts[0].privateKey).to.equal('3be4fc2ef3f3b7374e6fc4fb6e7bb153f8a2998b3b3dab50853eabe128024143')
 		expect(result.accounts[0].publicKey).to.equal('5b65b0e8173ee0802c2c3e6c9080d1a16b06de1176c938a924f58670904e82c4')
 		expect(result.accounts[0].address).to.equal('nano_1pu7p5n3ghq1i1p4rhmek41f5add1uh34xpb94nkbxe8g4a6x1p69emk8y1d')
+	})
+
+	it('should successfully import a wallet with the checksum starting with a zero', () => {
+		wallet.fromMnemonic('food define cancel major spoon trash cigar basic aim bless wolf win ability seek paddle bench seed century group they mercy address monkey cake')
 	})
 
 	it('should successfully import a wallet with the official Nano test vectors seed', () => {
