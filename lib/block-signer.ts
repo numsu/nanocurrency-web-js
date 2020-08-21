@@ -1,12 +1,12 @@
-import Ed25519 from './ed25519'
-import Convert from './util/convert'
-import NanoAddress from './nano-address'
-import NanoConverter from './nano-converter'
-import Signer from './signer'
-
 import BigNumber from 'bignumber.js'
 //@ts-ignore
 import { blake2b } from 'blakejs'
+
+import Ed25519 from './ed25519'
+import NanoAddress from './nano-address'
+import NanoConverter from './nano-converter'
+import Signer from './signer'
+import Convert from './util/convert'
 
 export default class BlockSigner {
 
@@ -18,7 +18,7 @@ export default class BlockSigner {
 
 	/**
 	 * Sign a receive block
-	 * 
+	 *
 	 * @param {ReceiveBlock} data The data required to sign a receive block
 	 * @param {string} privateKey Private key to sign the data with
 	 * @returns {SignedBlock} the signed block to publish to the blockchain
@@ -89,7 +89,7 @@ export default class BlockSigner {
 
 	/**
 	 * Sign a send block
-	 * 
+	 *
 	 * @param {SendBlock} data The data required to sign a send block
 	 * @param {string} privateKey Private key to sign the data with
 	 * @returns {SignedBlock} the signed block to publish to the blockchain

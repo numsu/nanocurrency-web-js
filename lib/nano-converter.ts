@@ -35,11 +35,11 @@ export default class NanoConverter {
 				return value.toFixed(0)
 			case 'NANO':
 			case 'MRAI':
-				return value.shiftedBy(-30).toFixed(15, 1)
+				return value.shiftedBy(-30).toFixed(30, 1)
 			case 'KRAI':
-				return value.shiftedBy(-27).toFixed(12, 1)
+				return value.shiftedBy(-27).toFixed(27, 1)
 			case 'RAI':
-				return value.shiftedBy(-24).toFixed(9, 1)
+				return value.shiftedBy(-24).toFixed(24, 1)
 			default:
 				throw new Error(`Unknown output unit ${outputUnit}, expected one of the following: RAW, NANO, MRAI, KRAI, RAI`)
 		}
