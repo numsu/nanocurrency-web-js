@@ -1,40 +1,35 @@
-import Bip32KeyDerivation from './bip32-key-derivation'
+import AddressImporter, { Wallet } from './address-importer'
 import Bip39Mnemonic from './bip39-mnemonic'
-import Ed25519 from './ed25519'
-import NanoAddress from './nano-address'
-import { Wallet } from './address-importer'
 
 export default class AddressGenerator {
 
 	/**
-	 * Generates the wallet
+	 * Generates a hierarchial deterministic BIP32/39/44 wallet
 	 *
 	 * @param {string} [entropy] - (Optional) Custom entropy if the caller doesn't want a default generated entropy
 	 * @param {string} [seedPassword] - (Optional) Password for the seed
 	 */
 	generateWallet(entropy = '', seedPassword: string = ''): Wallet {
 		const bip39 = new Bip39Mnemonic(seedPassword)
-		const wallet = bip39.createWallet(entropy)
-
-		const bip44 = new Bip32KeyDerivation(`44'/165'/0'`, wallet.seed)
-		const privateKey = bip44.derivePath().key
-
-		const ed25519 = new Ed25519()
-		const keyPair = ed25519.generateKeys(privateKey)
-
-		const nano = new NanoAddress()
-		const address = nano.deriveAddress(keyPair.publicKey)
+		const mnemonicSeed = bip39.createWallet(entropy)
+		const wallet = new AddressImporter().fromSeed(mnemonicSeed.seed, 0, 0)
 
 		return {
-			mnemonic: wallet.mnemonic,
-			seed: wallet.seed,
-			accounts: [{
-				accountIndex: 0,
-				privateKey: keyPair.privateKey,
-				publicKey: keyPair.publicKey,
-				address,
-			}],
+			...wallet,
+			mnemonic: mnemonicSeed.mnemonic,
 		}
+	}
+
+	/**
+	 * Generates a legacy Nano wallet
+	 *
+	 */
+	generateLegacyWallet(seed?: string): Wallet {
+		const bip39 = new Bip39Mnemonic()
+		const mnemonicSeed = bip39.createLegacyWallet(seed)
+		const wallet = new AddressImporter().fromLegacySeed(mnemonicSeed.seed, 0, 0, mnemonicSeed.mnemonic)
+
+		return wallet
 	}
 
 }

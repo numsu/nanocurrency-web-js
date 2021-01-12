@@ -93,12 +93,16 @@ export default class Convert {
 		return joined
 	}
 
+	static dec2bin = (dec: number): string => {
+		return (dec >>> 0).toString(2)
+	}
+
 	static bytesToHexString = (bytes: number[]): string => {
 		return [...bytes].map(b => b.toString(16).padStart(2, '0')).join('')
 	}
 
 	static hexStringToBinary = (hex: string): string => {
-		return [...hex].map(c => (parseInt(c, 16).toString(2)).padStart(4, '0')).join('')
+		return [...hex].map(c => (Convert.dec2bin(parseInt(c, 16))).padStart(4, '0')).join('')
 	}
 
 	static binaryToHexString = (bin: string): string => {

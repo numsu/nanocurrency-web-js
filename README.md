@@ -6,13 +6,14 @@
 
 Toolkit for Nano cryptocurrency client side offline implementations allowing you to build web- and mobile applications using Nano without compromising the user's keys by sending them out of their own device.
 
-The toolkit supports creating and importing wallets and signing blocks on-device. Meaning that the user's keys should never be required to leave the device.
+The toolkit supports creating and importing wallets and signing blocks on-device. Meaning that the user's keys should never be required to leave the device. And much more!
 
 ## Features
 
 * Generate wallets with a BIP32 mnemonic phrase
-* BIP39/44 private key derivation
-* Mnemonic is compatible with the Ledger Nano implementation
+* Generate wallets with legacy Nano mnemonic phrases
+* BIP32/44 private key derivation
+* BIP39 Mnemonic is the same one which Ledger uses in their hardware wallets
 * Import wallets with a mnemonic phrase or a seed
 * Import wallets with the legacy Nano hex seed
 * Sign send, receive and change representative blocks with a private key
@@ -44,8 +45,15 @@ import { wallet } from 'nanocurrency-web'
 // Notice, that losing the password will make the mnemonic phrase void
 const wallet = wallet.generate(entropy?, password?)
 
+// Generates a legacy wallet with a mnemonic phrase, seed and an account
+// You can provide your own seed to be used instead
+const wallet = wallet.generateLegacey(seed?)
+
 // Import a wallet with the mnemonic phrase
 const wallet = wallet.fromMnemonic(mnemonic, seedPassword?)
+
+// Import a wallet with the legacy mnemonic phrase
+const wallet = wallet.fromLegacyMnemonic(mnemonic)
 
 // Import a wallet with a seed
 const wallet = wallet.fromSeed(seed)
@@ -210,7 +218,7 @@ const valid = tools.validateMnemonic('edge defense waste choose enrich upon flee
 ### In web
 
 ```html
-<script src="https://unpkg.com/nanocurrency-web@1.2.2" type="text/javascript"></script>
+<script src="https://unpkg.com/nanocurrency-web@1.3.0" type="text/javascript"></script>
 <script type="text/javascript">
     NanocurrencyWeb.wallet.generate(...);
 </script>

@@ -56,7 +56,7 @@ describe('generate wallet test', () => {
 
 })
 
-// Test vectors from https://docs.nano.org/integration-guides/key-management/
+// Test vectors from https://docs.nano.org/integration-guides/key-management/ and elsewhere
 describe('import wallet with test vectors test', () => {
 
 	it('should successfully import a wallet with the official Nano test vectors mnemonic', () => {
@@ -94,7 +94,7 @@ describe('import wallet with test vectors test', () => {
 		expect(result).to.have.own.property('mnemonic')
 		expect(result).to.have.own.property('seed')
 		expect(result).to.have.own.property('accounts')
-		expect(result.mnemonic).to.be.undefined
+		expect(result.mnemonic).to.equal('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art')
 		expect(result.seed).to.equal('0000000000000000000000000000000000000000000000000000000000000000')
 		expect(result.accounts[0].privateKey).to.equal('9f0e444c69f77a49bd0be89db92c38fe713e0963165cca12faf5712d7657120f')
 		expect(result.accounts[0].publicKey).to.equal('c008b814a7d269a1fa3c6528b19201a24d797912db9996ff02a1ff356e45552b')
@@ -121,6 +121,19 @@ describe('import wallet with test vectors test', () => {
 
 	it('should throw when given a seed containing non-hex characters', () => {
 		expect(() => wallet.generate('0gc285fde768f7ff29b66ce7252d56ed92fe003b605907f7a4f683c3dc8586d34a914d3c71fc099bb38ee4a59e5b081a3497b7a323e90cc68f67b5837690310c')).to.throw(Error)
+	})
+
+	it('should successfully create a new legacy wallet and get the same result from importing one from the mnemonic', () => {
+		const result = wallet.generateLegacy('BE3E51EE51BAB11950B2495013512FEB110D9898B4137DA268709621CE2862F4')
+		expect(result).to.have.own.property('mnemonic')
+		expect(result).to.have.own.property('seed')
+		expect(result).to.have.own.property('accounts')
+		expect(result.mnemonic).to.equal('sail verb knee pet prison million drift empty exotic once episode stomach awkward slush glare list laundry battle bring clump brother before mesh pair')
+
+		const imported = wallet.fromLegacyMnemonic(result.mnemonic)
+		expect(imported.mnemonic).to.equal(result.mnemonic)
+		expect(imported.seed.toUpperCase()).to.equal(result.seed)
+		expect(imported.accounts[0].privateKey).to.equal(result.accounts[0].privateKey)
 	})
 
 })

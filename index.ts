@@ -41,6 +41,25 @@ const wallet = {
 	},
 
 	/**
+	 * Generate a new Nano cryptocurrency wallet
+	 *
+	 * This function generates a legacy wallet from a random seed. Wallet includes
+	 * a mnemonic phrase and a seed, the account is derived from the seed at index 0.
+	 *
+	 * The Nano address is derived from the public key using standard Nano encoding.
+	 * The address is prefixed with 'nano_'.
+	 *
+	 * Generation uses CryptoJS to generate random seed by default. You can give your own seed
+	 * as a parameter and it will be used instead.
+	 *
+	 * @param {string} [seed] - (Optional) 64 byte hexadecimal string seed to be used instead of generating
+	 * @returns the generated mnemonic, seed and account
+	 */
+	generateLegacy: (seed: string): Wallet => {
+		return generator.generateLegacyWallet(seed)
+	},
+
+	/**
 	 * Import a Nano cryptocurrency wallet from a mnemonic phrase
 	 *
 	 * This function imports a wallet from a mnemonic phrase. Wallet includes the mnemonic phrase,
@@ -57,6 +76,23 @@ const wallet = {
 	 */
 	fromMnemonic: (mnemonic: string, seedPassword?: string): Wallet => {
 		return importer.fromMnemonic(mnemonic, seedPassword)
+	},
+
+	/**
+	 * Import a Nano cryptocurrency wallet from a legacy mnemonic phrase
+	 *
+	 * This function imports a wallet from an old Nano mnemonic phrase. Wallet includes the mnemonic
+	 * phrase, a seed which represents the mnemonic and an account derived from the seed at index 0.
+	 *
+	 * The Nano address is derived from the public key using standard Nano encoding.
+	 * The address is prefixed with 'nano_'.
+	 *
+	 * @param {string} mnemonic - The mnemonic phrase. Words are separated with a space
+	 * @throws Throws an error if the mnemonic phrase doesn't pass validations
+	 * @returns the wallet derived from the mnemonic (mnemonic, seed, account)
+	 */
+	fromLegacyMnemonic: (mnemonic: string): Wallet => {
+		return importer.fromLegacyMnemonic(mnemonic)
 	},
 
 	/**
