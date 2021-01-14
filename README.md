@@ -10,16 +10,15 @@ The toolkit supports creating and importing wallets and signing blocks on-device
 
 ## Features
 
-* Generate wallets with a BIP32 mnemonic phrase
-* Generate wallets with legacy Nano mnemonic phrases
-* BIP32/44 private key derivation
-* BIP39 Mnemonic is the same one which Ledger uses in their hardware wallets
+* Supports BIP32/44 hierarchial deterministic (HD wallet) private key derivation with Nano's derivation path
+* Generate new HD wallets with a BIP39 mnemonic phrase (Also used in Ledger hardware wallet)
+* Generate new legacy Nano wallets with mnemonic phrases (Also used in Natrium wallet)
 * Import wallets with a mnemonic phrase or a seed
-* Import wallets with the legacy Nano hex seed
-* Sign send, receive and change representative blocks with a private key
-* Runs in all web browsers and mobile frameworks built with Javascript
+* Import wallets with the legacy Nano mnemonic phrase or seed
+* Sign send-, receive- and change representative blocks with a private key
+* Runs in all web browsers and mobile frameworks built with Javascript (doesn't require server-side NodeJS functions)
 * Convert Nano units
-* Sign any strings with the private key, for example using a password for the user created from the user ID.
+* Sign any strings with the private key, for example you can use the private key as the password by using a private key signature of any string as the password
 * Validate addresses and mnemonic words
 
 ---
