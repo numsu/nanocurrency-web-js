@@ -237,4 +237,4 @@ You are welcome to contribute to the module. To develop, use the following comma
 
 If this helped you in your endeavours and you feel like supporting the developer, feel free to donate some Nano:
 
-`nano_1wmcgzbqgbyyawsto6t37sc6y7pkekpctzp7n3ay6pcxcy717p5g79rpfj7e`
+`nano_1iic4ggaxy3eyg89xmswhj1r5j9uj66beka8qjcte11bs6uc3wdwr7i9hepm`
