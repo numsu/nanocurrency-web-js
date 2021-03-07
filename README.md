@@ -217,7 +217,7 @@ const valid = tools.validateMnemonic('edge defense waste choose enrich upon flee
 ### In web
 
 ```html
-<script src="https://unpkg.com/nanocurrency-web@1.3.0" type="text/javascript"></script>
+<script src="https://unpkg.com/nanocurrency-web@1.3.1" type="text/javascript"></script>
 <script type="text/javascript">
     NanocurrencyWeb.wallet.generate(...);
 </script>
