@@ -55,7 +55,7 @@ const wallet = {
 	 * @param {string} [seed] - (Optional) 64 byte hexadecimal string seed to be used instead of generating
 	 * @returns the generated mnemonic, seed and account
 	 */
-	generateLegacy: (seed: string): Wallet => {
+	generateLegacy: (seed?: string): Wallet => {
 		return generator.generateLegacyWallet(seed)
 	},
 
