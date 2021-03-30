@@ -49,10 +49,6 @@ export default class BlockSigner {
 			throw new Error('No frontier')
 		}
 
-		if (!data.work) {
-			throw new Error('No work')
-		}
-
 		if (!privateKey) {
 			throw new Error('Please input the private key to sign the block')
 		}
@@ -83,7 +79,7 @@ export default class BlockSigner {
 			balance: newBalanceRaw,
 			link: link,
 			signature: signature,
-			work: data.work,
+			work: data.work || '',
 		}
 	}
 
@@ -120,10 +116,6 @@ export default class BlockSigner {
 			throw new Error('Frontier is not set')
 		}
 
-		if (!data.work) {
-			throw new Error('Work is not set')
-		}
-
 		if (!privateKey) {
 			throw new Error('Please input the private key to sign the block')
 		}
@@ -154,7 +146,7 @@ export default class BlockSigner {
 			balance: newBalanceRaw,
 			link: link,
 			signature: signature,
-			work: data.work,
+			work: data.work || '',
 		}
 	}
 
@@ -184,7 +176,7 @@ export interface ReceiveBlock {
 	frontier: string
 	representativeAddress: string
 	amountRaw: string
-	work: string
+	work?: string
 }
 
 export interface SendBlock {
@@ -194,7 +186,7 @@ export interface SendBlock {
 	representativeAddress: string
 	frontier: string
 	amountRaw: string
-	work: string
+	work?: string
 }
 
 export interface RepresentativeBlock {
@@ -202,7 +194,7 @@ export interface RepresentativeBlock {
 	address: string
 	representativeAddress: string
 	frontier: string
-	work: string
+	work?: string
 }
 
 export interface SignedBlock {
