@@ -1,8 +1,10 @@
+import { TextDecoder } from 'util'
+
 import BigNumber from 'bignumber.js'
 
 import AddressGenerator from './lib/address-generator'
 import AddressImporter, { Account, Wallet } from './lib/address-importer'
-import BlockSigner, { ReceiveBlock, RepresentativeBlock, SendBlock, SignedBlock } from './lib/block-signer'
+import BlockSigner, { BlockData, ReceiveBlock, RepresentativeBlock, SendBlock, SignedBlock } from './lib/block-signer'
 import NanoAddress from './lib/nano-address'
 import NanoConverter from './lib/nano-converter'
 import Signer from './lib/signer'
@@ -127,7 +129,7 @@ const wallet = {
 	 *
 	 */
 	fromLegacySeed: (seed: string): Wallet => {
-		return importer.fromLegacySeed(seed);
+		return importer.fromLegacySeed(seed)
 	},
 
 	/**
@@ -260,7 +262,36 @@ const tools = {
 	 */
 	sign: (privateKey: string, ...input: string[]): string => {
 		const data = input.map(Convert.stringToHex)
-		return signer.sign(privateKey, ...data);
+		return signer.sign(privateKey, ...data)
+	},
+
+	/**
+	 * Verifies the signature of any input string
+	 *
+	 * @param {string} publicKey The public key to verify with
+	 * @param {string} signature The signature to verify
+	 * @param {...string} input Data to verify
+	 */
+	verify: (publicKey: string, signature: string, ...input: string[]): boolean => {
+		const data = input.map(Convert.stringToHex)
+		return signer.verify(publicKey, signature, ...data)
+	},
+
+	/**
+	 * Verifies the signature of any input string
+	 *
+	 * @param {string} publicKey The public key to verify with
+	 * @param {BlockData} block The block to verify
+	 */
+	verifyBlock: (publicKey: string, block: BlockData) => {
+		const preamble = 0x6.toString().padStart(64, '0')
+		return signer.verify(publicKey, block.signature,
+				preamble,
+				nanoAddress.nanoAddressToHexString(block.account),
+				block.previous,
+				nanoAddress.nanoAddressToHexString(block.representative),
+				Convert.dec2hex(block.balance, 16).toUpperCase(),
+				block.link)
 	},
 
 	/**
@@ -269,7 +300,7 @@ const tools = {
 	 * @param {string} input The address to validate
 	 */
 	validateAddress: (input: string): boolean => {
-		return nanoAddress.validateNanoAddress(input);
+		return nanoAddress.validateNanoAddress(input)
 	},
 
 	/**
@@ -278,7 +309,20 @@ const tools = {
 	 * @param {string} input The address to validate
 	 */
 	validateMnemonic: (input: string): boolean => {
-		return importer.validateMnemonic(input);
+		return importer.validateMnemonic(input)
+	},
+
+	/**
+	 * Convert a Nano address to a public key
+	 *
+	 * @param {string} input Nano address to convert
+	 */
+	addressToPublicKey: (input: string): string => {
+		const cleaned = input
+			.replace('nano_', '')
+			.replace('xrb_', '')
+		const publicKeyBytes = nanoAddress.decodeNanoBase32(cleaned)
+		return Convert.ab2hex(publicKeyBytes).slice(0, 64)
 	},
 
 }

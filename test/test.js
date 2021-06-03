@@ -256,14 +256,59 @@ describe('unit conversion tests', () => {
 
 describe('Signer tests', () => {
 
+	let testWallet;
+
+	before(() => {
+		this.testWallet = wallet.generate();
+	})
+
+	// Private key: 3be4fc2ef3f3b7374e6fc4fb6e7bb153f8a2998b3b3dab50853eabe128024143
+	// Public key: 5b65b0e8173ee0802c2c3e6c9080d1a16b06de1176c938a924f58670904e82c4
+
 	it('should sign data with a single parameter', () => {
-		const result = tools.sign('781186FB9EF17DB6E3D1056550D9FAE5D5BBADA6A6BC370E4CBB938B1DC71DA3', 'miro@metsanheimo.fi')
-		expect(result).to.equal('0ede9f287b7d58a053aa9ad84419c856ac39ec4c2453098ef19abf9638b07b1993e0cd3747723aada71602e92e781060dc3b91c410d32def1b4780a62fd0eb02')
+		const result = tools.sign('3be4fc2ef3f3b7374e6fc4fb6e7bb153f8a2998b3b3dab50853eabe128024143', 'miro@metsanheimo.fi')
+		expect(result).to.equal('fecb9b084065adc969904b55a0099c63746b68df41fecb713244d387eed83a80b9d4907278c5ebc0998a5fc8ba597fbaaabbfce0abd2ca2212acfe788637040c')
 	})
 
 	it('should sign data with multiple parameters', () => {
-		const result = tools.sign('781186FB9EF17DB6E3D1056550D9FAE5D5BBADA6A6BC370E4CBB938B1DC71DA3', 'miro@metsanheimo.fi', 'somePassword')
-		expect(result).to.equal('a7b88357a160f54cf4db2826c86483eb60e66e8ccb36f9a37f3fb636c9d80f7b59d1fba88d0be27f85ac3fcbe5c6e13f911d7e5b713e86fb8e9a635932a2af05')
+		const result = tools.sign('3be4fc2ef3f3b7374e6fc4fb6e7bb153f8a2998b3b3dab50853eabe128024143', 'miro@metsanheimo.fi', 'somePassword')
+		expect(result).to.equal('bb534f9b469af451b1941ffef8ee461fc5d284b5d393140900c6e13a65ef08d0ae2bc77131ee182922f66c250c7237a83878160457d5c39a70e55f7fce925804')
+	})
+
+	it('should verify a signature using the public key', () => {
+		const result = tools.verify('5b65b0e8173ee0802c2c3e6c9080d1a16b06de1176c938a924f58670904e82c4', 'fecb9b084065adc969904b55a0099c63746b68df41fecb713244d387eed83a80b9d4907278c5ebc0998a5fc8ba597fbaaabbfce0abd2ca2212acfe788637040c', 'miro@metsanheimo.fi')
+		expect(result).to.be.true
+
+		const result2 = tools.verify('5b65b0e8173ee0802c2c3e6c9080d1a16b06de1176c938a924f58670904e82c4', 'fecb9b084065adc969904b55a0099c63746b68df41fecb713244d387eed83a80b9d4907278c5ebc0998a5fc8ba597fbaaabbfce0abd2ca2212acfe788637040c', 'mir@metsanheimo.fi')
+		expect(result2).to.be.false
+
+		const result3 = tools.verify('5b65b0e8173ee0802c2c3e6c9080d1a16b06de1176c938a924f58670904e82c4', 'aecb9b084065adc969904b55a0099c63746b68df41fecb713244d387eed83a80b9d4907278c5ebc0998a5fc8ba597fbaaabbfce0abd2ca2212acfe788637040c', 'miro@metsanheimo.fi')
+		expect(result3).to.be.false
+	})
+
+	it('should verify a block using the public key', () => {
+		const sendBlock = block.send({
+			walletBalanceRaw: '5618869000000000000000000000000',
+			fromAddress: this.testWallet.accounts[0].address,
+			toAddress: 'nano_1q3hqecaw15cjt7thbtxu3pbzr1eihtzzpzxguoc37bj1wc5ffoh7w74gi6p',
+			representativeAddress: 'nano_1stofnrxuz3cai7ze75o174bpm7scwj9jn3nxsn8ntzg784jf1gzn1jjdkou',
+			frontier: '92BA74A7D6DC7557F3EDA95ADC6341D51AC777A0A6FF0688A5C492AB2B2CB40D',
+			amountRaw: '2000000000000000000000000000000',
+		}, this.testWallet.accounts[0].privateKey)
+
+		const publicKey = tools.addressToPublicKey(this.testWallet.accounts[0].address)
+
+		const valid = tools.verifyBlock(publicKey, sendBlock)
+		expect(valid).to.be.true
+
+		sendBlock.account = 'nano_1q3hqecaw15cjt7thbtxu3pbzr1eihtzzpzxguoc37bj1wc5ffoh7w74gi6p'
+		const valid2 = tools.verifyBlock(this.testWallet.accounts[0].publicKey, sendBlock)
+		expect(valid2).to.be.false
+	})
+
+	it('should convert a Nano address to public key', () => {
+		const publicKey = tools.addressToPublicKey('nano_1pu7p5n3ghq1i1p4rhmek41f5add1uh34xpb94nkbxe8g4a6x1p69emk8y1d')
+		expect(publicKey).to.equal('5b65b0e8173ee0802c2c3e6c9080d1a16b06de1176c938a924f58670904e82c4')
 	})
 
 })

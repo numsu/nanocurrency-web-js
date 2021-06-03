@@ -175,6 +175,32 @@ const data = {
 // Returns a correctly formatted and signed block ready to be sent to the blockchain
 const signedBlock = block.representative(data, privateKey)
 ```
+#### Verifying signatures
+Cryptocurrencies rely on public key cryptographgy. This means that you can use the public key to validate the signature of the block that is signed with the private key.
+```javascript
+import { tools } from 'nanocurrency-web'
+
+const valid = tools.verifyBlock(publicKey, block)
+```
+##### Using signature verification to prove ownership of the address
+You are able to challenge an user to prove ownership of a Nano address simply by making the user sign any string with the private key and validating the signature.
+```javascript
+import { tools } from 'nanocurrency-web'
+
+const nanoAddress = 'nano_1pu7p5n3ghq1i1p4rhmek41f5add1uh34xpb94nkbxe8g4a6x1p69emk8y1d'
+const privateKey = '3be4fc2ef3f3b7374e6fc4fb6e7bb153f8a2998b3b3dab50853eabe128024143'
+const data = 'sign this'
+
+// Make the user sign the data
+const signature = tools.sign(privateKey, data)
+
+// Infer the user's public key from the address (if not already known)
+const publicKey = tools.addressToPublicKey(nanoAddress)
+
+// Verify the signature using the public key, the signature and the original data
+const validSignature = tools.verify(publicKey, signature, data)
+
+```
 
 #### Converting units
 
@@ -217,7 +243,7 @@ const valid = tools.validateMnemonic('edge defense waste choose enrich upon flee
 ### In web
 
 ```html
-<script src="https://unpkg.com/nanocurrency-web@1.3.2" type="text/javascript"></script>
+<script src="https://unpkg.com/nanocurrency-web@1.3.3" type="text/javascript"></script>
 <script type="text/javascript">
     NanocurrencyWeb.wallet.generate(...);
 </script>

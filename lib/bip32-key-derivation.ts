@@ -1,5 +1,6 @@
 //@ts-ignore
-import { enc, algo } from 'crypto-js'
+import { algo, enc } from 'crypto-js'
+
 import Convert from './util/convert'
 
 const ED25519_CURVE = 'ed25519 seed'

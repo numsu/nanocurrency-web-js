@@ -1,8 +1,9 @@
+//@ts-ignore
+import { blake2b, blake2bFinal, blake2bInit, blake2bUpdate } from 'blakejs'
+
 import Convert from './util/convert'
 import Curve25519 from './util/curve25519'
-
-//@ts-ignore
-import { blake2b } from 'blakejs'
+import Util from './util/util'
 
 export default class Ed25519 {
 
@@ -120,11 +121,11 @@ export default class Ed25519 {
 	/**
 	 * Generate a message signature
 	 * @param {Uint8Array} msg Message to be signed as byte array
-	 * @param {Uint8Array} secretKey Secret key as byte array
+	 * @param {Uint8Array} privateKey Secret key as byte array
 	 * @param {Uint8Array} Returns the signature as 64 byte typed array
 	 */
-	sign(msg: Uint8Array, secretKey: Uint8Array): Uint8Array {
-		const signedMsg = this.naclSign(msg, secretKey)
+	sign(msg: Uint8Array, privateKey: Uint8Array): Uint8Array {
+		const signedMsg = this.naclSign(msg, privateKey)
 		const sig = new Uint8Array(64)
 
 		for (let i = 0; i < sig.length; i++) {
@@ -132,6 +133,44 @@ export default class Ed25519 {
 		}
 
 		return sig
+	}
+
+	/**
+	 * Verify a message signature
+	 * @param {Uint8Array} msg Message to be signed as byte array
+	 * @param {Uint8Array} publicKey Public key as byte array
+	 * @param {Uint8Array} signature Signature as byte array
+	 * @param {Uint8Array} Returns the signature as 64 byte typed array
+	 */
+	verify(msg: Uint8Array, publicKey: Uint8Array, signature: Uint8Array): boolean {
+		const CURVE = this.curve;
+		const p = [CURVE.gf(), CURVE.gf(), CURVE.gf(), CURVE.gf()]
+		const q = [CURVE.gf(), CURVE.gf(), CURVE.gf(), CURVE.gf()]
+
+		if (signature.length !== 64) {
+			return false
+		}
+		if (publicKey.length !== 32) {
+			return false
+		}
+		if (CURVE.unpackNeg(q, publicKey)) {
+			return false
+		}
+
+		const ctx = blake2bInit(64, undefined)
+		blake2bUpdate(ctx, signature.subarray(0, 32))
+		blake2bUpdate(ctx, publicKey)
+		blake2bUpdate(ctx, msg)
+		let k = blake2bFinal(ctx)
+		this.reduce(k)
+		this.scalarmult(p, q, k)
+
+		let t = new Uint8Array(32)
+		this.scalarbase(q, signature.subarray(32))
+		CURVE.add(p, q)
+		this.pack(t, p)
+
+		return Util.compare(signature.subarray(0, 32), t)
 	}
 
 	private naclSign(msg: Uint8Array, secretKey: Uint8Array): Uint8Array {
