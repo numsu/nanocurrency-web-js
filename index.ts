@@ -1,5 +1,3 @@
-import { TextDecoder } from 'util'
-
 import BigNumber from 'bignumber.js'
 
 import AddressGenerator from './lib/address-generator'
@@ -32,11 +30,12 @@ const wallet = {
 	 * as a parameter and it will be used instead.
 	 *
 	 * An optional seed password can be used to encrypt the mnemonic phrase so the seed
-	 * cannot be derived correctly without the password. Recovering the password is not possible.
+	 * cannot be derived correctly without the password. Recovering the wallet without the
+	 * password is not possible.
 	 *
-	 * @param {string} [entropy] - (Optional) 64 byte hexadecimal string entropy to be used instead of the default
+	 * @param {string} [entropy] - (Optional) 64 byte hexadecimal string entropy to be used instead of generating it
 	 * @param {string} [seedPassword] - (Optional) seed password
-	 * @returns the generated mnemonic, seed and account
+	 * @returns {Wallet} The wallet
 	 */
 	generate: (entropy?: string, seedPassword?: string): Wallet => {
 		return generator.generateWallet(entropy, seedPassword)
@@ -54,8 +53,8 @@ const wallet = {
 	 * Generation uses CryptoJS to generate random seed by default. You can give your own seed
 	 * as a parameter and it will be used instead.
 	 *
-	 * @param {string} [seed] - (Optional) 64 byte hexadecimal string seed to be used instead of generating
-	 * @returns the generated mnemonic, seed and account
+	 * @param {string} [seed] - (Optional) 64 byte hexadecimal string seed to be used instead of generating it
+	 * @returns {Wallet} The wallet
 	 */
 	generateLegacy: (seed?: string): Wallet => {
 		return generator.generateLegacyWallet(seed)
@@ -74,7 +73,7 @@ const wallet = {
 	 * @param {string} mnemonic - The mnemonic phrase. Words are separated with a space
 	 * @param {string} [seedPassword] - (Optional) seed password
 	 * @throws Throws an error if the mnemonic phrase doesn't pass validations
-	 * @returns the wallet derived from the mnemonic (mnemonic, seed, account)
+	 * @returns {Wallet} The wallet
 	 */
 	fromMnemonic: (mnemonic: string, seedPassword?: string): Wallet => {
 		return importer.fromMnemonic(mnemonic, seedPassword)
@@ -91,7 +90,7 @@ const wallet = {
 	 *
 	 * @param {string} mnemonic - The mnemonic phrase. Words are separated with a space
 	 * @throws Throws an error if the mnemonic phrase doesn't pass validations
-	 * @returns the wallet derived from the mnemonic (mnemonic, seed, account)
+	 * @returns {Wallet} The wallet
 	 */
 	fromLegacyMnemonic: (mnemonic: string): Wallet => {
 		return importer.fromLegacyMnemonic(mnemonic)
@@ -108,7 +107,7 @@ const wallet = {
 	 * The address is prefixed with 'nano_'.
 	 *
 	 * @param {string} seed - The seed
-	 * @returns {Wallet} the wallet derived from the seed (seed, account)
+	 * @returns {Wallet} The wallet, without the mnemonic phrase because it's not possible to infer backwards
 	 */
 	fromSeed: (seed: string): Wallet => {
 		return importer.fromSeed(seed)
@@ -125,8 +124,7 @@ const wallet = {
 	 * The address is prefixed with 'nano_'.
 	 *
 	 * @param {string} seed - The seed
-	 * @returns the wallet derived from the seed (seed, account)
-	 *
+	 * @returns {Wallet} The wallet
 	 */
 	fromLegacySeed: (seed: string): Wallet => {
 		return importer.fromLegacySeed(seed)
@@ -142,6 +140,7 @@ const wallet = {
 	 * @param {string} seed - The seed
 	 * @param {number} from - The start index
 	 * @param {number} to - The end index
+	 * @returns {Account[]} a list of accounts
 	 */
 	accounts: (seed: string, from: number, to: number): Account[] => {
 		return importer.fromSeed(seed, from, to).accounts
@@ -156,6 +155,7 @@ const wallet = {
 	 * @param {string} seed - The seed
 	 * @param {number} from - The start index
 	 * @param {number} to - The end index
+	 * @returns {Account[]} a list of accounts
 	 */
 	legacyAccounts: (seed: string, from: number, to: number): Account[] => {
 		return importer.fromLegacySeed(seed, from, to).accounts
@@ -173,15 +173,16 @@ const block = {
 	 * the recipient address to the 'toAddress' property.
 	 * All the NANO amounts should be input in RAW format. The addresses should be
 	 * valid Nano addresses. Fetch the current balance, frontier (previous block) and
-	 * representative address from the blockchain and generate work for the signature.
+	 * representative address from the network.
 	 *
-	 * The return value of this function is ready to be published to the blockchain.
+	 * The return value of this function is ready to be published to the network.
 	 *
-	 * NOTICE: Always fetch up-to-date account info from the blockchain
-	 *         before signing the block
+	 * NOTICE: Always fetch up-to-date account info from the network
+	 *         before signing the block.
 	 *
 	 * @param {SendBlock} data The data for the block
 	 * @param {string} privateKey Private key to sign the block
+	 * @returns {SignedBlock} the signed block
 	 */
 	send: (data: SendBlock, privateKey: string): SignedBlock => {
 		return blockSigner.send(data, privateKey)
@@ -194,16 +195,17 @@ const block = {
 	 * For a receive block, put your own address to the 'toAddress' property.
 	 * All the NANO amounts should be input in RAW format. The addresses should be
 	 * valid Nano addresses. Fetch the current balance, frontier (previous block) and
-	 * representative address from the blockchain and generate work for the signature.
+	 * representative address from the network.
 	 * Input the receive amount and transaction hash from the pending block.
 	 *
-	 * The return value of this function is ready to be published to the blockchain.
+	 * The return value of this function is ready to be published to the network.
 	 *
-	 * NOTICE: Always fetch up-to-date account info from the blockchain
-	 *         before signing the block
+	 * NOTICE: Always fetch up-to-date account info from the network
+	 *         before signing the block.
 	 *
 	 * @param {ReceiveBlock} data The data for the block
 	 * @param {string} privateKey Private key to sign the block
+	 * @returns {SignedBlock} the signed block
 	 */
 	receive: (data: ReceiveBlock, privateKey: string): SignedBlock => {
 		return blockSigner.receive(data, privateKey)
@@ -216,15 +218,15 @@ const block = {
 	 * For a change block, put your own address to the 'address' property.
 	 * All the NANO amounts should be input in RAW format. The addresses should be
 	 * valid Nano addresses. Fetch the current balance, previous block from the
-	 * blockchain and generate work for the signature. Set the new representative address
+	 * network. Set the new representative address
 	 * as the representative.
 	 *
-	 * NOTICE: Always fetch up-to-date account info from the blockchain
-	 *         before signing the block
+	 * NOTICE: Always fetch up-to-date account info from the network
+	 *         before signing the block.
 	 *
 	 * @param {RepresentativeBlock} data The data for the block
 	 * @param {string} privateKey Private key to sign the block
-	 *
+	 * @returns {SignedBlock} the signed block
 	 */
 	representative: (data: RepresentativeBlock, privateKey: string): SignedBlock => {
 		const block: SendBlock = {
@@ -249,6 +251,7 @@ const tools = {
 	 * @param {string | BigNumber} input The input value
 	 * @param {string} inputUnit The unit of the input value
 	 * @param {string} outputUnit The unit you wish to convert to
+	 * @returns {string} The converted value
 	 */
 	convert: (input: string | BigNumber, inputUnit: string, outputUnit: string): string => {
 		return NanoConverter.convert(input, inputUnit, outputUnit)
@@ -259,6 +262,7 @@ const tools = {
 	 *
 	 * @param {string} privateKey The private key to sign with
 	 * @param {...string} input Data to sign
+	 * @returns {string} The signature
 	 */
 	sign: (privateKey: string, ...input: string[]): string => {
 		const data = input.map(Convert.stringToHex)
@@ -271,6 +275,7 @@ const tools = {
 	 * @param {string} publicKey The public key to verify with
 	 * @param {string} signature The signature to verify
 	 * @param {...string} input Data to verify
+	 * @returns {boolean} valid or not
 	 */
 	verify: (publicKey: string, signature: string, ...input: string[]): boolean => {
 		const data = input.map(Convert.stringToHex)
@@ -282,8 +287,9 @@ const tools = {
 	 *
 	 * @param {string} publicKey The public key to verify with
 	 * @param {BlockData} block The block to verify
+	 * @returns {boolean} valid or not
 	 */
-	verifyBlock: (publicKey: string, block: BlockData) => {
+	verifyBlock: (publicKey: string, block: BlockData): boolean => {
 		const preamble = 0x6.toString().padStart(64, '0')
 		return signer.verify(publicKey, block.signature,
 				preamble,
@@ -298,6 +304,7 @@ const tools = {
 	 * Validate a Nano address
 	 *
 	 * @param {string} input The address to validate
+	 * @returns {boolean} valid or not
 	 */
 	validateAddress: (input: string): boolean => {
 		return nanoAddress.validateNanoAddress(input)
@@ -307,6 +314,7 @@ const tools = {
 	 * Validate mnemonic words
 	 *
 	 * @param {string} input The address to validate
+	 * @returns {boolean} valid or not
 	 */
 	validateMnemonic: (input: string): boolean => {
 		return importer.validateMnemonic(input)
@@ -316,6 +324,7 @@ const tools = {
 	 * Convert a Nano address to a public key
 	 *
 	 * @param {string} input Nano address to convert
+	 * @returns {string} the public key
 	 */
 	addressToPublicKey: (input: string): string => {
 		const cleaned = input
