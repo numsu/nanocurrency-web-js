@@ -316,4 +316,17 @@ describe('Signer tests', () => {
 		expect(publicKey).to.equal('5b65b0e8173ee0802c2c3e6c9080d1a16b06de1176c938a924f58670904e82c4')
 	})
 
+	it('should convert a public key to a Nano address', () => {
+		const address = tools.publicKeyToAddress('5b65b0e8173ee0802c2c3e6c9080d1a16b06de1176c938a924f58670904e82c4')
+		expect(address).to.equal('nano_1pu7p5n3ghq1i1p4rhmek41f5add1uh34xpb94nkbxe8g4a6x1p69emk8y1d')
+	})
+
+	it('should create a blake2b hash', () => {
+		let hash = tools.blake2b('asd')
+		expect(hash).to.equal('f787fbcdd2b4c6f6447921d6f163e8fddfb83d08432430cacaaab1bbedd723fe')
+
+		hash = tools.blake2b(['asd'])
+		expect(hash).to.equal('f787fbcdd2b4c6f6447921d6f163e8fddfb83d08432430cacaaab1bbedd723fe')
+	})
+
 })

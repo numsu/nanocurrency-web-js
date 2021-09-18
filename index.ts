@@ -334,6 +334,30 @@ const tools = {
 		return Convert.ab2hex(publicKeyBytes).slice(0, 64)
 	},
 
+	/**
+	 * Convert a public key to a Nano address
+	 *
+	 * @param {string} input Public key to convert
+	 * @returns {string} the nano address
+	 */
+	publicKeyToAddress: (input: string): string => {
+		return nanoAddress.deriveAddress(input)
+	},
+
+	/**
+	 * Hash a string or array of strings with blake2b
+	 *
+	 * @param {string | string[]} input string to hash
+	 * @returns {string} hashed string
+	 */
+	blake2b: (input: string | string[]): string => {
+		if (Array.isArray(input)) {
+			return Convert.ab2hex(signer.generateHash(input.map(Convert.stringToHex)))
+		} else {
+			return Convert.ab2hex(signer.generateHash([Convert.stringToHex(input)]))
+		}
+	},
+
 }
 
 export {
