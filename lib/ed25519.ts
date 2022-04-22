@@ -119,6 +119,24 @@ export default class Ed25519 {
 	}
 
 	/**
+	 * Convert ed25519 keypair to curve25519 keypair suitable for Diffie-Hellman key exchange
+	 *
+	 * @param {KeyPair} keyPair ed25519 keypair
+	 * @returns {KeyPair} keyPair Curve25519 keypair
+	 */
+	convertKeys(keyPair: KeyPair): KeyPair {
+		const publicKey = Convert.ab2hex(this.curve.convertEd25519PublicKeyToCurve25519(Convert.hex2ab(keyPair.publicKey)))
+		if (!publicKey) {
+			return null
+		}
+		const privateKey = Convert.ab2hex(this.curve.convertEd25519SecretKeyToCurve25519(Convert.hex2ab(keyPair.privateKey)))
+		return {
+			publicKey,
+			privateKey,
+		}
+	}
+
+	/**
 	 * Generate a message signature
 	 * @param {Uint8Array} msg Message to be signed as byte array
 	 * @param {Uint8Array} privateKey Secret key as byte array
@@ -143,7 +161,7 @@ export default class Ed25519 {
 	 * @param {Uint8Array} Returns the signature as 64 byte typed array
 	 */
 	verify(msg: Uint8Array, publicKey: Uint8Array, signature: Uint8Array): boolean {
-		const CURVE = this.curve;
+		const CURVE = this.curve
 		const p = [CURVE.gf(), CURVE.gf(), CURVE.gf(), CURVE.gf()]
 		const q = [CURVE.gf(), CURVE.gf(), CURVE.gf(), CURVE.gf()]
 
@@ -197,7 +215,7 @@ export default class Ed25519 {
 
 		const pk = Convert.hex2ab(this.generateKeys(Convert.ab2hex(sk)).publicKey)
 
-		this.cryptoHash(d, sk, 32)
+		this.curve.cryptoHash(d, sk, 32)
 		d[0] &= 248
 		d[31] &= 127
 		d[31] |= 64
@@ -211,7 +229,7 @@ export default class Ed25519 {
 			sm[32 + i] = d[32 + i]
 		}
 
-		this.cryptoHash(r, sm.subarray(32), n + 32)
+		this.curve.cryptoHash(r, sm.subarray(32), n + 32)
 		this.reduce(r)
 		this.scalarbase(p, r)
 		this.pack(sm, p)
@@ -220,7 +238,7 @@ export default class Ed25519 {
 			sm[i] = pk[i - 32]
 		}
 
-		this.cryptoHash(h, sm, n + 64)
+		this.curve.cryptoHash(h, sm, n + 64)
 		this.reduce(h)
 
 		for (i = 0; i < 64; i++) {
@@ -240,20 +258,6 @@ export default class Ed25519 {
 		this.modL(sm.subarray(32), x)
 
 		return smlen
-	}
-
-	private cryptoHash(out: Uint8Array, m: Uint8Array, n: number): number {
-		const input = new Uint8Array(n)
-		for (let i = 0; i < n; ++i) {
-			input[i] = m[i]
-		}
-
-		const hash = blake2b(input)
-		for (let i = 0; i < 64; ++i) {
-			out[i] = hash[i]
-		}
-
-		return 0
 	}
 
 }

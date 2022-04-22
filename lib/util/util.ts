@@ -7,7 +7,7 @@ export default class Util {
 	 * @param {Uint8Array} rh Second array of bytes
 	 * @return {Boolean} True if the arrays are equal (length and content), false otherwise
 	 */
-	static compare(lh: Uint8Array, rh: Uint8Array): boolean {
+	static compare = (lh: Uint8Array, rh: Uint8Array): boolean => {
 		if (lh.length !== rh.length) {
 			return false
 		}

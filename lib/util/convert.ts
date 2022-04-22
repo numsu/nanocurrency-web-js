@@ -27,6 +27,21 @@ export default class Convert {
 	}
 
 	/**
+	 * Convert a byte array to a UTF-8 encoded string
+	 *
+	 * @param {Uint8Array} arr Byte array
+	 * @return {String} UTF-8 encoded string
+	 */
+	static bin2str = (arr: Uint8Array) => {
+		let i, s = []
+		for (i = 0; i < arr.length; i++) {
+			s.push(String.fromCharCode(arr[i]))
+		}
+
+		return decodeURIComponent(escape(s.join('')))
+	}
+
+	/**
 	 * Convert Array of 8 bytes (int64) to hex string
 	 *
 	 * @param {Uint8Array} bin Array of bytes

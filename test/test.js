@@ -1,7 +1,7 @@
 'use strict'
 
 const expect = require('chai').expect
-const { wallet, block, tools } = require('../dist/index')
+const { wallet, block, tools, box } = require('../dist/index')
 
 // WARNING: Do not send any funds to the test vectors below
 describe('generate wallet test', () => {
@@ -261,10 +261,8 @@ describe('unit conversion tests', () => {
 
 describe('Signer tests', () => {
 
-	let testWallet;
-
 	before(() => {
-		this.testWallet = wallet.generate();
+		this.testWallet = wallet.generate()
 	})
 
 	// Private key: 3be4fc2ef3f3b7374e6fc4fb6e7bb153f8a2998b3b3dab50853eabe128024143
@@ -327,6 +325,58 @@ describe('Signer tests', () => {
 
 		hash = tools.blake2b(['asd'])
 		expect(hash).to.equal('f787fbcdd2b4c6f6447921d6f163e8fddfb83d08432430cacaaab1bbedd723fe')
+	})
+
+})
+
+describe('Box tests', () => {
+
+	before(() => {
+		this.message = 'The quick brown fox jumps over the lazy dog'
+		this.bob = wallet.generate()
+		this.alice = wallet.generate()
+	})
+
+	it('should encrypt and decrypt a message', () => {
+		const encrypted = box.encrypt(this.message, this.alice.accounts[0].address, this.bob.accounts[0].privateKey)
+		const encrypted2 = box.encrypt(this.message, this.alice.accounts[0].address, this.bob.accounts[0].privateKey)
+		const encrypted3 = box.encrypt(this.message + 'asd', this.alice.accounts[0].address, this.bob.accounts[0].privateKey)
+
+		// Just to be safe
+		expect(this.message).to.not.equal(encrypted)
+		expect(encrypted).to.not.equal(encrypted2)
+		expect(encrypted).to.not.equal(encrypted3)
+
+		const decrypted = box.decrypt(encrypted, this.bob.accounts[0].address, this.alice.accounts[0].privateKey)
+		expect(this.message).to.equal(decrypted)
+	})
+
+	it('should fail to decrypt with wrong public key in encryption', () => {
+		// Encrypt with wrong public key
+		const aliceAccounts = wallet.accounts(this.alice.seed, 1, 2)
+		const encrypted = box.encrypt(this.message, aliceAccounts[0].address, this.bob.accounts[0].privateKey)
+		expect(() => box.decrypt(encrypted, this.bob.accounts[0].address, this.alice.accounts[0].privateKey)).to.throw()
+	})
+
+	it('should fail to decrypt with wrong public key in decryption', () => {
+		// Decrypt with wrong public key
+		const bobAccounts = wallet.accounts(this.bob.seed, 1, 2)
+		const encrypted = box.encrypt(this.message, this.alice.accounts[0].address, this.bob.accounts[0].privateKey)
+		expect(() => box.decrypt(encrypted, bobAccounts[0].address, this.alice.accounts[0].privateKey)).to.throw()
+	})
+
+	it('should fail to decrypt with wrong private key in encryption', () => {
+		// Encrypt with wrong public key
+		const bobAccounts = wallet.accounts(this.bob.seed, 1, 2)
+		const encrypted = box.encrypt(this.message, this.alice.accounts[0].address, bobAccounts[0].privateKey)
+		expect(() => box.decrypt(encrypted, this.bob.accounts[0].address, this.alice.accounts[0].privateKey)).to.throw()
+	})
+
+	it('should fail to decrypt with wrong private key in decryption', () => {
+		// Encrypt with wrong public key
+		const aliceAccounts = wallet.accounts(this.alice.seed, 1, 2)
+		const encrypted = box.encrypt(this.message, this.alice.accounts[0].address, this.bob.accounts[0].privateKey)
+		expect(() => box.decrypt(encrypted, this.bob.accounts[0].address, aliceAccounts[0].privateKey)).to.throw()
 	})
 
 })

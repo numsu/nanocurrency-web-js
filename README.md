@@ -33,7 +33,7 @@ npm install nanocurrency-web
 ### In web
 
 ```html
-<script src="https://unpkg.com/nanocurrency-web@1.3.6" type="text/javascript"></script>
+<script src="https://unpkg.com/nanocurrency-web@1.4.0" type="text/javascript"></script>
 <script type="text/javascript">
     NanocurrencyWeb.wallet.generate(...);
 </script>
@@ -114,7 +114,7 @@ If the account hasn't been opened yet (this is the first block), you will need t
 ```javascript
 import { block } from 'nanocurrency-web'
 
-const privateKey = '781186FB9EF17DB6E3D1056550D9FAE5D5BBADA6A6BC370E4CBB938B1DC71DA3';
+const privateKey = '781186FB9EF17DB6E3D1056550D9FAE5D5BBADA6A6BC370E4CBB938B1DC71DA3'
 const data = {
     // Current balance from account info
     walletBalanceRaw: '5618869000000000000000000000000',
@@ -147,7 +147,7 @@ const signedBlock = block.send(data, privateKey)
 ```javascript
 import { block } from 'nanocurrency-web'
 
-const privateKey = '781186FB9EF17DB6E3D1056550D9FAE5D5BBADA6A6BC370E4CBB938B1DC71DA3';
+const privateKey = '781186FB9EF17DB6E3D1056550D9FAE5D5BBADA6A6BC370E4CBB938B1DC71DA3'
 const data = {
     // Your current balance in RAW from account info
     walletBalanceRaw: '18618869000000000000000000000000',
@@ -180,7 +180,7 @@ const signedBlock = block.receive(data, privateKey)
 ```javascript
 import { block } from 'nanocurrency-web'
 
-const privateKey = '781186FB9EF17DB6E3D1056550D9FAE5D5BBADA6A6BC370E4CBB938B1DC71DA3';
+const privateKey = '781186FB9EF17DB6E3D1056550D9FAE5D5BBADA6A6BC370E4CBB938B1DC71DA3'
 const data = {
     // Your current balance, from account info
     walletBalanceRaw: '3000000000000000000000000000000',
@@ -268,6 +268,19 @@ const valid = tools.validateAddress('nano_1pu7p5n3ghq1i1p4rhmek41f5add1uh34xpb94
 
 // Validate mnemonic phrases
 const valid = tools.validateMnemonic('edge defense waste choose enrich upon flee junk siren film clown finish luggage leader kid quick brick print evidence swap drill paddle truly occur')
+```
+
+#### Encrypting and decrypting strings
+You are able to encrypt and decrypt strings to implement end-to-end encryption using the Diffie-Hellman key exchange by using the Nano address and private key. The public and private keys are converted to Curve25519 keys which are suitable for encryption within the library.
+
+```javascript
+import { box } from 'nanocurrency-web'
+
+// Encrypt on device 1
+const encrypted = box.encrypt(message, recipientAddress, senderPrivateKey)
+
+// Send the encrypted message to the recipient and decrypt on device 2
+const decrypted = box.decrypt(encrypted, senderAddress, recipientPrivateKey)
 ```
 
 ## Contributions
