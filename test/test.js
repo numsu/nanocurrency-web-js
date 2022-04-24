@@ -332,7 +332,7 @@ describe('Signer tests', () => {
 describe('Box tests', () => {
 
 	before(() => {
-		this.message = 'The quick brown fox jumps over the lazy dog'
+		this.message = 'The quick brown fox jumps over the lazy dog 🔥'
 		this.bob = wallet.generate()
 		this.alice = wallet.generateLegacy()
 	})

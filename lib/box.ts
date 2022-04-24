@@ -24,7 +24,7 @@ export default class Box {
 
 		const nonce = Convert.hex2ab(lib.WordArray.random(this.NONCE_LENGTH).toString())
 		const encrypted = new Curve25519().box(
-			Convert.str2bin(message),
+			Convert.decodeUTF8(message),
 			nonce,
 			Convert.hex2ab(convertedPublicKey),
 			Convert.hex2ab(convertedPrivateKey),
@@ -63,7 +63,7 @@ export default class Box {
 			throw new Error('Could not decrypt message')
 		}
 
-		return Convert.bin2str(decrypted)
+		return Convert.encodeUTF8(decrypted)
 	}
 
 }

@@ -30,15 +30,32 @@ export default class Convert {
 	 * Convert a byte array to a UTF-8 encoded string
 	 *
 	 * @param {Uint8Array} arr Byte array
-	 * @return {String} UTF-8 encoded string
+	 * @return {string} UTF-8 encoded string
 	 */
-	static bin2str = (arr: Uint8Array) => {
-		let i, s = []
-		for (i = 0; i < arr.length; i++) {
+	static encodeUTF8 = (arr: Uint8Array): string => {
+		const s = []
+		for (let i = 0; i < arr.length; i++) {
 			s.push(String.fromCharCode(arr[i]))
 		}
-
 		return decodeURIComponent(escape(s.join('')))
+	}
+
+	/**
+	 * Convert a UTF-8 encoded string to a byte array
+	 *
+	 * @param {string} str UTF-8 encoded string
+	 * @return {Uint8Array} Byte array
+	 */
+	static decodeUTF8 = (str: string): Uint8Array => {
+		if (typeof str !== 'string') {
+			throw new TypeError('expected string')
+		}
+		const d = unescape(encodeURIComponent(str))
+		const b = new Uint8Array(d.length)
+		for (let i = 0; i < d.length; i++) {
+			b[i] = d.charCodeAt(i)
+		}
+		return b
 	}
 
 	/**
