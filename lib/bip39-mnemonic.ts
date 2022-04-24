@@ -53,7 +53,7 @@ export default class Bip39Mnemonic {
 		}
 
 		if (!seed) {
-			seed = this.randomHex(64)
+			seed = this.randomHex(32)
 		}
 
 		const mnemonic = this.deriveMnemonic(seed)

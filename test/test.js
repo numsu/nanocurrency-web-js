@@ -334,10 +334,10 @@ describe('Box tests', () => {
 	before(() => {
 		this.message = 'The quick brown fox jumps over the lazy dog'
 		this.bob = wallet.generate()
-		this.alice = wallet.generate()
+		this.alice = wallet.generateLegacy()
 	})
 
-	it('should encrypt and decrypt a message', () => {
+	it('should encrypt and decrypt a message from bob to alice', () => {
 		const encrypted = box.encrypt(this.message, this.alice.accounts[0].address, this.bob.accounts[0].privateKey)
 		const encrypted2 = box.encrypt(this.message, this.alice.accounts[0].address, this.bob.accounts[0].privateKey)
 		const encrypted3 = box.encrypt(this.message + 'asd', this.alice.accounts[0].address, this.bob.accounts[0].privateKey)
@@ -351,9 +351,15 @@ describe('Box tests', () => {
 		expect(this.message).to.equal(decrypted)
 	})
 
+	it('should encrypt and decrypt a message from alice to bob', () => {
+		const encrypted = box.encrypt(this.message, this.bob.accounts[0].address, this.alice.accounts[0].privateKey)
+		const decrypted = box.decrypt(encrypted, this.alice.accounts[0].address, this.bob.accounts[0].privateKey)
+		expect(this.message).to.equal(decrypted)
+	})
+
 	it('should fail to decrypt with wrong public key in encryption', () => {
 		// Encrypt with wrong public key
-		const aliceAccounts = wallet.accounts(this.alice.seed, 1, 2)
+		const aliceAccounts = wallet.legacyAccounts(this.alice.seed, 1, 2)
 		const encrypted = box.encrypt(this.message, aliceAccounts[0].address, this.bob.accounts[0].privateKey)
 		expect(() => box.decrypt(encrypted, this.bob.accounts[0].address, this.alice.accounts[0].privateKey)).to.throw()
 	})
@@ -374,7 +380,7 @@ describe('Box tests', () => {
 
 	it('should fail to decrypt with wrong private key in decryption', () => {
 		// Encrypt with wrong public key
-		const aliceAccounts = wallet.accounts(this.alice.seed, 1, 2)
+		const aliceAccounts = wallet.legacyAccounts(this.alice.seed, 1, 2)
 		const encrypted = box.encrypt(this.message, this.alice.accounts[0].address, this.bob.accounts[0].privateKey)
 		expect(() => box.decrypt(encrypted, this.bob.accounts[0].address, aliceAccounts[0].privateKey)).to.throw()
 	})
