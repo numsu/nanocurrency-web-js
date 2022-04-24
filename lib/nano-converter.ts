@@ -9,7 +9,7 @@ export default class NanoConverter {
 	 * @param inputUnit {string} the unit to convert from
 	 * @param outputUnit {string} the unit to convert to
 	 */
-	static convert(input: string | BigNumber, inputUnit: string, outputUnit: string): string {
+	static convert = (input: string | BigNumber, inputUnit: string, outputUnit: string): string => {
 		let value = new BigNumber(input.toString())
 
 		switch (inputUnit) {

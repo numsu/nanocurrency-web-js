@@ -1,5 +1,16 @@
+//@ts-ignore
+import { blake2b } from 'blakejs'
+
 import Util from './util'
 
+/**
+ * Derived from:
+ * - mipher
+ * - tweetnacl
+ * - ed2curve-js
+ *
+ * With added types etc
+ */
 export default class Curve25519 {
 
 	gf0: Int32Array
@@ -9,6 +20,9 @@ export default class Curve25519 {
 	I: Int32Array
 	_9: Uint8Array
 	_121665: Int32Array
+	_0: Uint8Array
+	sigma: Uint8Array
+	minusp: Uint32Array
 
 	constructor() {
 		this.gf0 = this.gf()
@@ -19,6 +33,9 @@ export default class Curve25519 {
 		this.D = this.gf([0x78a3, 0x1359, 0x4dca, 0x75eb, 0xd8ab, 0x4141, 0x0a4d, 0x0070, 0xe898, 0x7779, 0x4079, 0x8cc7, 0xfe73, 0x2b6f, 0x6cee, 0x5203])
 		this.D2 = this.gf([0xf159, 0x26b2, 0x9b94, 0xebd6, 0xb156, 0x8283, 0x149a, 0x00e0, 0xd130, 0xeef3, 0x80f2, 0x198e, 0xfce7, 0x56df, 0xd9dc, 0x2406])
 		this.I = this.gf([0xa0b0, 0x4a0e, 0x1b27, 0xc4ee, 0xe478, 0xad2f, 0x1806, 0x2f43, 0xd7a7, 0x3dfb, 0x0099, 0x2b4d, 0xdf0b, 0x4fc1, 0x2480, 0x2b83])
+		this._0 = new Uint8Array(16)
+		this.sigma = new Uint8Array([101, 120, 112, 97, 110, 100, 32, 51, 50, 45, 98, 121, 116, 101, 32, 107])
+		this.minusp = new Uint32Array([5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 252])
 	}
 
 	gf(init?: number[]): Int32Array {
@@ -413,6 +430,336 @@ export default class Curve25519 {
 		o[15] = t15
 	}
 
+	coreSalsa20(o: Uint8Array, p: Uint8Array, k: Uint8Array, c: Uint8Array) {
+		const j0  = c[ 0] & 0xff | (c[ 1] & 0xff)<<8 | (c[ 2] & 0xff)<<16 | (c[ 3] & 0xff)<<24,
+			j1  = k[ 0] & 0xff | (k[ 1] & 0xff)<<8 | (k[ 2] & 0xff)<<16 | (k[ 3] & 0xff)<<24,
+			j2  = k[ 4] & 0xff | (k[ 5] & 0xff)<<8 | (k[ 6] & 0xff)<<16 | (k[ 7] & 0xff)<<24,
+			j3  = k[ 8] & 0xff | (k[ 9] & 0xff)<<8 | (k[10] & 0xff)<<16 | (k[11] & 0xff)<<24,
+			j4  = k[12] & 0xff | (k[13] & 0xff)<<8 | (k[14] & 0xff)<<16 | (k[15] & 0xff)<<24,
+			j5  = c[ 4] & 0xff | (c[ 5] & 0xff)<<8 | (c[ 6] & 0xff)<<16 | (c[ 7] & 0xff)<<24,
+			j6  = p[ 0] & 0xff | (p[ 1] & 0xff)<<8 | (p[ 2] & 0xff)<<16 | (p[ 3] & 0xff)<<24,
+			j7  = p[ 4] & 0xff | (p[ 5] & 0xff)<<8 | (p[ 6] & 0xff)<<16 | (p[ 7] & 0xff)<<24,
+			j8  = p[ 8] & 0xff | (p[ 9] & 0xff)<<8 | (p[10] & 0xff)<<16 | (p[11] & 0xff)<<24,
+			j9  = p[12] & 0xff | (p[13] & 0xff)<<8 | (p[14] & 0xff)<<16 | (p[15] & 0xff)<<24,
+			j10 = c[ 8] & 0xff | (c[ 9] & 0xff)<<8 | (c[10] & 0xff)<<16 | (c[11] & 0xff)<<24,
+			j11 = k[16] & 0xff | (k[17] & 0xff)<<8 | (k[18] & 0xff)<<16 | (k[19] & 0xff)<<24,
+			j12 = k[20] & 0xff | (k[21] & 0xff)<<8 | (k[22] & 0xff)<<16 | (k[23] & 0xff)<<24,
+			j13 = k[24] & 0xff | (k[25] & 0xff)<<8 | (k[26] & 0xff)<<16 | (k[27] & 0xff)<<24,
+			j14 = k[28] & 0xff | (k[29] & 0xff)<<8 | (k[30] & 0xff)<<16 | (k[31] & 0xff)<<24,
+			j15 = c[12] & 0xff | (c[13] & 0xff)<<8 | (c[14] & 0xff)<<16 | (c[15] & 0xff)<<24
+
+		let x0 = j0, x1 = j1, x2 = j2, x3 = j3, x4 = j4, x5 = j5, x6 = j6, x7 = j7,
+			x8 = j8, x9 = j9, x10 = j10, x11 = j11, x12 = j12, x13 = j13, x14 = j14,
+			x15 = j15, u
+
+		for (let i = 0; i < 20; i += 2) {
+			u = x0 + x12 | 0
+			x4 ^= u<<7 | u>>>(32-7)
+			u = x4 + x0 | 0
+			x8 ^= u<<9 | u>>>(32-9)
+			u = x8 + x4 | 0
+			x12 ^= u<<13 | u>>>(32-13)
+			u = x12 + x8 | 0
+			x0 ^= u<<18 | u>>>(32-18)
+
+			u = x5 + x1 | 0
+			x9 ^= u<<7 | u>>>(32-7)
+			u = x9 + x5 | 0
+			x13 ^= u<<9 | u>>>(32-9)
+			u = x13 + x9 | 0
+			x1 ^= u<<13 | u>>>(32-13)
+			u = x1 + x13 | 0
+			x5 ^= u<<18 | u>>>(32-18)
+
+			u = x10 + x6 | 0
+			x14 ^= u<<7 | u>>>(32-7)
+			u = x14 + x10 | 0
+			x2 ^= u<<9 | u>>>(32-9)
+			u = x2 + x14 | 0
+			x6 ^= u<<13 | u>>>(32-13)
+			u = x6 + x2 | 0
+			x10 ^= u<<18 | u>>>(32-18)
+
+			u = x15 + x11 | 0
+			x3 ^= u<<7 | u>>>(32-7)
+			u = x3 + x15 | 0
+			x7 ^= u<<9 | u>>>(32-9)
+			u = x7 + x3 | 0
+			x11 ^= u<<13 | u>>>(32-13)
+			u = x11 + x7 | 0
+			x15 ^= u<<18 | u>>>(32-18)
+
+			u = x0 + x3 | 0
+			x1 ^= u<<7 | u>>>(32-7)
+			u = x1 + x0 | 0
+			x2 ^= u<<9 | u>>>(32-9)
+			u = x2 + x1 | 0
+			x3 ^= u<<13 | u>>>(32-13)
+			u = x3 + x2 | 0
+			x0 ^= u<<18 | u>>>(32-18)
+
+			u = x5 + x4 | 0
+			x6 ^= u<<7 | u>>>(32-7)
+			u = x6 + x5 | 0
+			x7 ^= u<<9 | u>>>(32-9)
+			u = x7 + x6 | 0
+			x4 ^= u<<13 | u>>>(32-13)
+			u = x4 + x7 | 0
+			x5 ^= u<<18 | u>>>(32-18)
+
+			u = x10 + x9 | 0
+			x11 ^= u<<7 | u>>>(32-7)
+			u = x11 + x10 | 0
+			x8 ^= u<<9 | u>>>(32-9)
+			u = x8 + x11 | 0
+			x9 ^= u<<13 | u>>>(32-13)
+			u = x9 + x8 | 0
+			x10 ^= u<<18 | u>>>(32-18)
+
+			u = x15 + x14 | 0
+			x12 ^= u<<7 | u>>>(32-7)
+			u = x12 + x15 | 0
+			x13 ^= u<<9 | u>>>(32-9)
+			u = x13 + x12 | 0
+			x14 ^= u<<13 | u>>>(32-13)
+			u = x14 + x13 | 0
+			x15 ^= u<<18 | u>>>(32-18)
+		}
+		 x0 =  x0 +  j0 | 0
+		 x1 =  x1 +  j1 | 0
+		 x2 =  x2 +  j2 | 0
+		 x3 =  x3 +  j3 | 0
+		 x4 =  x4 +  j4 | 0
+		 x5 =  x5 +  j5 | 0
+		 x6 =  x6 +  j6 | 0
+		 x7 =  x7 +  j7 | 0
+		 x8 =  x8 +  j8 | 0
+		 x9 =  x9 +  j9 | 0
+		x10 = x10 + j10 | 0
+		x11 = x11 + j11 | 0
+		x12 = x12 + j12 | 0
+		x13 = x13 + j13 | 0
+		x14 = x14 + j14 | 0
+		x15 = x15 + j15 | 0
+
+		o[ 0] = x0 >>>  0 & 0xff
+		o[ 1] = x0 >>>  8 & 0xff
+		o[ 2] = x0 >>> 16 & 0xff
+		o[ 3] = x0 >>> 24 & 0xff
+
+		o[ 4] = x1 >>>  0 & 0xff
+		o[ 5] = x1 >>>  8 & 0xff
+		o[ 6] = x1 >>> 16 & 0xff
+		o[ 7] = x1 >>> 24 & 0xff
+
+		o[ 8] = x2 >>>  0 & 0xff
+		o[ 9] = x2 >>>  8 & 0xff
+		o[10] = x2 >>> 16 & 0xff
+		o[11] = x2 >>> 24 & 0xff
+
+		o[12] = x3 >>>  0 & 0xff
+		o[13] = x3 >>>  8 & 0xff
+		o[14] = x3 >>> 16 & 0xff
+		o[15] = x3 >>> 24 & 0xff
+
+		o[16] = x4 >>>  0 & 0xff
+		o[17] = x4 >>>  8 & 0xff
+		o[18] = x4 >>> 16 & 0xff
+		o[19] = x4 >>> 24 & 0xff
+
+		o[20] = x5 >>>  0 & 0xff
+		o[21] = x5 >>>  8 & 0xff
+		o[22] = x5 >>> 16 & 0xff
+		o[23] = x5 >>> 24 & 0xff
+
+		o[24] = x6 >>>  0 & 0xff
+		o[25] = x6 >>>  8 & 0xff
+		o[26] = x6 >>> 16 & 0xff
+		o[27] = x6 >>> 24 & 0xff
+
+		o[28] = x7 >>>  0 & 0xff
+		o[29] = x7 >>>  8 & 0xff
+		o[30] = x7 >>> 16 & 0xff
+		o[31] = x7 >>> 24 & 0xff
+
+		o[32] = x8 >>>  0 & 0xff
+		o[33] = x8 >>>  8 & 0xff
+		o[34] = x8 >>> 16 & 0xff
+		o[35] = x8 >>> 24 & 0xff
+
+		o[36] = x9 >>>  0 & 0xff
+		o[37] = x9 >>>  8 & 0xff
+		o[38] = x9 >>> 16 & 0xff
+		o[39] = x9 >>> 24 & 0xff
+
+		o[40] = x10 >>>  0 & 0xff
+		o[41] = x10 >>>  8 & 0xff
+		o[42] = x10 >>> 16 & 0xff
+		o[43] = x10 >>> 24 & 0xff
+
+		o[44] = x11 >>>  0 & 0xff
+		o[45] = x11 >>>  8 & 0xff
+		o[46] = x11 >>> 16 & 0xff
+		o[47] = x11 >>> 24 & 0xff
+
+		o[48] = x12 >>>  0 & 0xff
+		o[49] = x12 >>>  8 & 0xff
+		o[50] = x12 >>> 16 & 0xff
+		o[51] = x12 >>> 24 & 0xff
+
+		o[52] = x13 >>>  0 & 0xff
+		o[53] = x13 >>>  8 & 0xff
+		o[54] = x13 >>> 16 & 0xff
+		o[55] = x13 >>> 24 & 0xff
+
+		o[56] = x14 >>>  0 & 0xff
+		o[57] = x14 >>>  8 & 0xff
+		o[58] = x14 >>> 16 & 0xff
+		o[59] = x14 >>> 24 & 0xff
+
+		o[60] = x15 >>>  0 & 0xff
+		o[61] = x15 >>>  8 & 0xff
+		o[62] = x15 >>> 16 & 0xff
+		o[63] = x15 >>> 24 & 0xff
+	}
+
+	coreHsalsa20(o: Uint8Array, p: Uint8Array, k: Uint8Array, c: Uint8Array) {
+		const j0  = c[ 0] & 0xff | (c[ 1] & 0xff)<<8 | (c[ 2] & 0xff)<<16 | (c[ 3] & 0xff)<<24,
+			j1  = k[ 0] & 0xff | (k[ 1] & 0xff)<<8 | (k[ 2] & 0xff)<<16 | (k[ 3] & 0xff)<<24,
+			j2  = k[ 4] & 0xff | (k[ 5] & 0xff)<<8 | (k[ 6] & 0xff)<<16 | (k[ 7] & 0xff)<<24,
+			j3  = k[ 8] & 0xff | (k[ 9] & 0xff)<<8 | (k[10] & 0xff)<<16 | (k[11] & 0xff)<<24,
+			j4  = k[12] & 0xff | (k[13] & 0xff)<<8 | (k[14] & 0xff)<<16 | (k[15] & 0xff)<<24,
+			j5  = c[ 4] & 0xff | (c[ 5] & 0xff)<<8 | (c[ 6] & 0xff)<<16 | (c[ 7] & 0xff)<<24,
+			j6  = p[ 0] & 0xff | (p[ 1] & 0xff)<<8 | (p[ 2] & 0xff)<<16 | (p[ 3] & 0xff)<<24,
+			j7  = p[ 4] & 0xff | (p[ 5] & 0xff)<<8 | (p[ 6] & 0xff)<<16 | (p[ 7] & 0xff)<<24,
+			j8  = p[ 8] & 0xff | (p[ 9] & 0xff)<<8 | (p[10] & 0xff)<<16 | (p[11] & 0xff)<<24,
+			j9  = p[12] & 0xff | (p[13] & 0xff)<<8 | (p[14] & 0xff)<<16 | (p[15] & 0xff)<<24,
+			j10 = c[ 8] & 0xff | (c[ 9] & 0xff)<<8 | (c[10] & 0xff)<<16 | (c[11] & 0xff)<<24,
+			j11 = k[16] & 0xff | (k[17] & 0xff)<<8 | (k[18] & 0xff)<<16 | (k[19] & 0xff)<<24,
+			j12 = k[20] & 0xff | (k[21] & 0xff)<<8 | (k[22] & 0xff)<<16 | (k[23] & 0xff)<<24,
+			j13 = k[24] & 0xff | (k[25] & 0xff)<<8 | (k[26] & 0xff)<<16 | (k[27] & 0xff)<<24,
+			j14 = k[28] & 0xff | (k[29] & 0xff)<<8 | (k[30] & 0xff)<<16 | (k[31] & 0xff)<<24,
+			j15 = c[12] & 0xff | (c[13] & 0xff)<<8 | (c[14] & 0xff)<<16 | (c[15] & 0xff)<<24
+
+		let x0 = j0, x1 = j1, x2 = j2, x3 = j3, x4 = j4, x5 = j5, x6 = j6, x7 = j7,
+			x8 = j8, x9 = j9, x10 = j10, x11 = j11, x12 = j12, x13 = j13, x14 = j14,
+			x15 = j15, u
+
+		for (let i = 0; i < 20; i += 2) {
+			u = x0 + x12 | 0
+			x4 ^= u<<7 | u>>>(32-7)
+			u = x4 + x0 | 0
+			x8 ^= u<<9 | u>>>(32-9)
+			u = x8 + x4 | 0
+			x12 ^= u<<13 | u>>>(32-13)
+			u = x12 + x8 | 0
+			x0 ^= u<<18 | u>>>(32-18)
+
+			u = x5 + x1 | 0
+			x9 ^= u<<7 | u>>>(32-7)
+			u = x9 + x5 | 0
+			x13 ^= u<<9 | u>>>(32-9)
+			u = x13 + x9 | 0
+			x1 ^= u<<13 | u>>>(32-13)
+			u = x1 + x13 | 0
+			x5 ^= u<<18 | u>>>(32-18)
+
+			u = x10 + x6 | 0
+			x14 ^= u<<7 | u>>>(32-7)
+			u = x14 + x10 | 0
+			x2 ^= u<<9 | u>>>(32-9)
+			u = x2 + x14 | 0
+			x6 ^= u<<13 | u>>>(32-13)
+			u = x6 + x2 | 0
+			x10 ^= u<<18 | u>>>(32-18)
+
+			u = x15 + x11 | 0
+			x3 ^= u<<7 | u>>>(32-7)
+			u = x3 + x15 | 0
+			x7 ^= u<<9 | u>>>(32-9)
+			u = x7 + x3 | 0
+			x11 ^= u<<13 | u>>>(32-13)
+			u = x11 + x7 | 0
+			x15 ^= u<<18 | u>>>(32-18)
+
+			u = x0 + x3 | 0
+			x1 ^= u<<7 | u>>>(32-7)
+			u = x1 + x0 | 0
+			x2 ^= u<<9 | u>>>(32-9)
+			u = x2 + x1 | 0
+			x3 ^= u<<13 | u>>>(32-13)
+			u = x3 + x2 | 0
+			x0 ^= u<<18 | u>>>(32-18)
+
+			u = x5 + x4 | 0
+			x6 ^= u<<7 | u>>>(32-7)
+			u = x6 + x5 | 0
+			x7 ^= u<<9 | u>>>(32-9)
+			u = x7 + x6 | 0
+			x4 ^= u<<13 | u>>>(32-13)
+			u = x4 + x7 | 0
+			x5 ^= u<<18 | u>>>(32-18)
+
+			u = x10 + x9 | 0
+			x11 ^= u<<7 | u>>>(32-7)
+			u = x11 + x10 | 0
+			x8 ^= u<<9 | u>>>(32-9)
+			u = x8 + x11 | 0
+			x9 ^= u<<13 | u>>>(32-13)
+			u = x9 + x8 | 0
+			x10 ^= u<<18 | u>>>(32-18)
+
+			u = x15 + x14 | 0
+			x12 ^= u<<7 | u>>>(32-7)
+			u = x12 + x15 | 0
+			x13 ^= u<<9 | u>>>(32-9)
+			u = x13 + x12 | 0
+			x14 ^= u<<13 | u>>>(32-13)
+			u = x14 + x13 | 0
+			x15 ^= u<<18 | u>>>(32-18)
+		}
+
+		o[ 0] = x0 >>>  0 & 0xff
+		o[ 1] = x0 >>>  8 & 0xff
+		o[ 2] = x0 >>> 16 & 0xff
+		o[ 3] = x0 >>> 24 & 0xff
+
+		o[ 4] = x5 >>>  0 & 0xff
+		o[ 5] = x5 >>>  8 & 0xff
+		o[ 6] = x5 >>> 16 & 0xff
+		o[ 7] = x5 >>> 24 & 0xff
+
+		o[ 8] = x10 >>>  0 & 0xff
+		o[ 9] = x10 >>>  8 & 0xff
+		o[10] = x10 >>> 16 & 0xff
+		o[11] = x10 >>> 24 & 0xff
+
+		o[12] = x15 >>>  0 & 0xff
+		o[13] = x15 >>>  8 & 0xff
+		o[14] = x15 >>> 16 & 0xff
+		o[15] = x15 >>> 24 & 0xff
+
+		o[16] = x6 >>>  0 & 0xff
+		o[17] = x6 >>>  8 & 0xff
+		o[18] = x6 >>> 16 & 0xff
+		o[19] = x6 >>> 24 & 0xff
+
+		o[20] = x7 >>>  0 & 0xff
+		o[21] = x7 >>>  8 & 0xff
+		o[22] = x7 >>> 16 & 0xff
+		o[23] = x7 >>> 24 & 0xff
+
+		o[24] = x8 >>>  0 & 0xff
+		o[25] = x8 >>>  8 & 0xff
+		o[26] = x8 >>> 16 & 0xff
+		o[27] = x8 >>> 24 & 0xff
+
+		o[28] = x9 >>>  0 & 0xff
+		o[29] = x9 >>>  8 & 0xff
+		o[30] = x9 >>> 16 & 0xff
+		o[31] = x9 >>> 24 & 0xff
+	}
+
 	S(o: Int32Array, a: Int32Array): void {
 		this.M(o, a, a)
 	}
@@ -612,6 +959,14 @@ export default class Curve25519 {
 		return 0
 	}
 
+	vn(x: Uint8Array, xi: number, y: Uint8Array, yi: number, n: number) {
+		let i, d = 0
+		for (i = 0; i < n; i++) {
+			d |= x[xi+i]^y[yi+i]
+		}
+		return (1 & ((d - 1) >>> 8)) - 1
+	}
+
 	/**
 	 * Internal scalar mult function
 	 * @param {Uint8Array} q Result
@@ -671,6 +1026,289 @@ export default class Curve25519 {
 		this.pack25519(q, x16)
 	}
 
+	cryptoStreamSalsa20Xor(c: Uint8Array, cpos: number, m: Uint8Array, mpos: number, b: number, n: Uint8Array, k: Uint8Array) {
+		const z = new Uint8Array(16)
+		const x = new Uint8Array(64)
+		let u, i
+		for (i = 0; i < 16; i++) {
+			z[i] = 0
+		}
+		for (i = 0; i < 8; i++) {
+			z[i] = n[i]
+		}
+		while (b >= 64) {
+			this.coreSalsa20(x, z, k, this.sigma)
+			for (i = 0; i < 64; i++) c[cpos+i] = m[mpos+i] ^ x[i]
+				u = 1
+			for (i = 8; i < 16; i++) {
+				u = u + (z[i] & 0xff) | 0
+				z[i] = u & 0xff
+				u >>>= 8
+			}
+			b -= 64
+			cpos += 64
+			mpos += 64
+		}
+		if (b > 0) {
+			this.coreSalsa20(x, z, k, this.sigma)
+			for (i = 0; i < b; i++) {
+				c[cpos+i] = m[mpos+i] ^ x[i]
+			}
+		}
+		return 0
+	}
+
+	cryptoStreamSalsa20(c: Uint8Array, cpos: number, b: number, n: Uint8Array, k: Uint8Array) {
+		const z = new Uint8Array(16), x = new Uint8Array(64)
+		let u, i
+		for (i = 0; i < 16; i++) z[i] = 0
+		for (i = 0; i < 8; i++) z[i] = n[i]
+		while (b >= 64) {
+			this.coreSalsa20(x, z, k, this.sigma)
+			for (i = 0; i < 64; i++) {
+				c[cpos+i] = x[i]
+			}
+			u = 1
+			for (i = 8; i < 16; i++) {
+				u = u + (z[i] & 0xff) | 0
+				z[i] = u & 0xff
+				u >>>= 8
+			}
+			b -= 64
+			cpos += 64
+		}
+		if (b > 0) {
+			this.coreSalsa20(x, z, k, this.sigma)
+			for (i = 0; i < b; i++) {
+				c[cpos+i] = x[i]
+			}
+		}
+		return 0
+	}
+
+	add1305(h: Uint32Array, c: Uint32Array) {
+		let j, u = 0
+		for (j = 0; j < 17; j++) {
+			u = (u + ((h[j] + c[j]) | 0)) | 0
+			h[j] = u & 255
+			u >>>= 8
+		}
+	}
+
+	cryptoOnetimeauth(out: Uint8Array, outpos: number, m: Uint8Array, mpos: number, n: number, k: Uint8Array) {
+		let s, i, j, u
+		const x = new Uint32Array(17), r = new Uint32Array(17),
+			h = new Uint32Array(17), c = new Uint32Array(17),
+			g = new Uint32Array(17)
+		for (j = 0; j < 17; j++) {
+			r[j]=h[j]=0
+		}
+		for (j = 0; j < 16; j++) {
+			r[j]=k[j]
+		}
+
+		r[3]&=15
+		r[4]&=252
+		r[7]&=15
+		r[8]&=252
+		r[11]&=15
+		r[12]&=252
+		r[15]&=15
+
+		while (n > 0) {
+			for (j = 0; j < 17; j++) {
+				c[j] = 0
+			}
+			for (j = 0; (j < 16) && (j < n); ++j) {
+				c[j] = m[mpos+j]
+			}
+			c[j] = 1
+			mpos += j; n -= j
+			this.add1305(h, c)
+			for (i = 0; i < 17; i++) {
+				x[i] = 0
+				for (j = 0; j < 17; j++) {
+					x[i] = (x[i] + (h[j] * ((j <= i) ? r[i - j] : ((320 * r[i + 17 - j])|0))) | 0) | 0
+				}
+			}
+			for (i = 0; i < 17; i++) {
+				h[i] = x[i]
+			}
+			u = 0
+			for (j = 0; j < 16; j++) {
+				u = (u + h[j]) | 0
+				h[j] = u & 255
+				u >>>= 8
+			}
+			u = (u + h[16]) | 0; h[16] = u & 3
+			u = (5 * (u >>> 2)) | 0
+			for (j = 0; j < 16; j++) {
+				u = (u + h[j]) | 0
+				h[j] = u & 255
+				u >>>= 8
+			}
+			u = (u + h[16]) | 0; h[16] = u
+		}
+
+		for (j = 0; j < 17; j++) {
+			g[j] = h[j]
+		}
+		this.add1305(h, this.minusp)
+		s = (-(h[16] >>> 7) | 0)
+		for (j = 0; j < 17; j++) {
+			h[j] ^= s & (g[j] ^ h[j])
+		}
+
+		for (j = 0; j < 16; j++) {
+			c[j] = k[j + 16]
+		}
+		c[16] = 0
+		this.add1305(h, c)
+		for (j = 0; j < 16; j++) {
+			out[outpos+j] = h[j]
+		}
+		return 0
+	}
+
+	cryptoOnetimeauthVerify(h: Uint8Array, hpos: number, m: Uint8Array, mpos: number, n: number, k: Uint8Array) {
+		const x = new Uint8Array(16)
+		this.cryptoOnetimeauth(x, 0, m, mpos, n, k)
+		return this.cryptoVerify16(h, hpos, x, 0)
+	}
+
+	cryptoVerify16(x: Uint8Array, xi: number, y: Uint8Array, yi: number) {
+		return this.vn(x, xi, y, yi, 16)
+	}
+
+	cryptoBoxBeforenm(k: Uint8Array, y: Uint8Array, x: Uint8Array) {
+		const s = new Uint8Array(32)
+		this.cryptoScalarmult(s, x, y)
+		return this.coreHsalsa20(k, this._0, s, this.sigma)
+	}
+
+	cryptoSecretbox(c: Uint8Array, m: Uint8Array, d: number, n: Uint8Array, k: Uint8Array) {
+		let i
+		if (d < 32) {
+			return -1
+		}
+		this.cryptoStreamXor(c, 0, m, 0, d, n, k)
+		this.cryptoOnetimeauth(c, 16, c, 32, d - 32, c)
+		for (i = 0; i < 16; i++) {
+			c[i] = 0
+		}
+		return 0
+	}
+
+	cryptoSecretboxOpen(m: Uint8Array, c: Uint8Array, d: number, n: Uint8Array, k: Uint8Array) {
+		let i
+		const x = new Uint8Array(32)
+		if (d < 32) {
+			return -1
+		}
+		this.cryptoStream(x, 0, 32, n, k)
+		if (this.cryptoOnetimeauthVerify(c, 16, c, 32, d - 32, x) !== 0) {
+			return -1
+		}
+		this.cryptoStreamXor(m, 0, c, 0, d, n, k)
+		for (i = 0; i < 32; i++) {
+			m[i] = 0
+		}
+		return 0
+	}
+
+	cryptoStream(c: Uint8Array, cpos: number, d: number, n: Uint8Array, k: Uint8Array) {
+		const s = new Uint8Array(32)
+		this.coreHsalsa20(s, n, k, this.sigma)
+		const sn = new Uint8Array(8)
+		for (var i = 0; i < 8; i++) {
+			sn[i] = n[i+16]
+		}
+		return this.cryptoStreamSalsa20(c, cpos, d, sn, s)
+	}
+
+	cryptoStreamXor(c: Uint8Array, cpos: number, m: Uint8Array, mpos: number, d: number, n: Uint8Array, k: Uint8Array) {
+		const s = new Uint8Array(32)
+		this.coreHsalsa20(s, n, k, this.sigma)
+		const sn = new Uint8Array(8)
+		for (var i = 0; i < 8; i++) {
+			sn[i] = n[i+16]
+		}
+		return this.cryptoStreamSalsa20Xor(c, cpos, m, mpos, d, sn, s)
+	  }
+
+	checkLengths(k: Uint8Array, n: Uint8Array) {
+		if (k.length !== 32) {
+			throw new Error('bad key size')
+		}
+		if (n.length !== 24) {
+			throw new Error('bad nonce size')
+		}
+	}
+
+	checkBoxLengths(pk: Uint8Array, sk: Uint8Array) {
+		if (pk.length !== 32) {
+			throw new Error('bad public key size')
+		}
+		if (sk.length !== 32) {
+			throw new Error('bad secret key size')
+		}
+	}
+
+	checkArrayTypes(...params: any) {
+		for (let i = 0; i < params.length; i++) {
+			if (!(params[i] instanceof Uint8Array)) {
+				throw new TypeError('unexpected type, use Uint8Array')
+			}
+		}
+	}
+
+	secretbox(msg: Uint8Array, nonce: Uint8Array, key: Uint8Array) {
+		this.checkArrayTypes(msg, nonce, key)
+		this.checkLengths(key, nonce)
+		const m = new Uint8Array(32 + msg.length)
+		const c = new Uint8Array(m.length)
+		for (let i = 0; i < msg.length; i++) {
+			m[i + 32] = msg[i]
+		}
+		this.cryptoSecretbox(c, m, m.length, nonce, key)
+		return c.subarray(16)
+	}
+
+	secretboxOpen(box: Uint8Array, nonce: Uint8Array, key: Uint8Array) {
+		this.checkArrayTypes(box, nonce, key)
+		this.checkLengths(key, nonce)
+		const c = new Uint8Array(16 + box.length)
+		const m = new Uint8Array(c.length)
+		for (let i = 0; i < box.length; i++) {
+			c[i+16] = box[i]
+		}
+		if (c.length < 32) {
+			return null
+		}
+		if (this.cryptoSecretboxOpen(m, c, c.length, nonce, key) !== 0) {
+			return null
+		}
+		return m.subarray(32)
+	  }
+
+	box(msg: Uint8Array, nonce: Uint8Array, publicKey: Uint8Array, secretKey: Uint8Array) {
+		const k = this.boxBefore(publicKey, secretKey)
+		return this.secretbox(msg, nonce, k)
+	}
+
+	boxOpen(msg: Uint8Array, nonce: Uint8Array, publicKey: Uint8Array, secretKey: Uint8Array) {
+		const k = this.boxBefore(publicKey, secretKey)
+		return this.secretboxOpen(msg, nonce, k)
+	}
+
+	boxBefore(publicKey: Uint8Array, secretKey: Uint8Array) {
+		this.checkArrayTypes(publicKey, secretKey)
+		this.checkBoxLengths(publicKey, secretKey)
+		const k = new Uint8Array(32)
+		this.cryptoBoxBeforenm(k, publicKey, secretKey)
+		return k
+	}
+
 	/**
 	 * Generate the common key as the produkt of sk1 * pk2
 	 * @param {Uint8Array} sk A 32 byte secret key of pair 1
@@ -706,6 +1344,71 @@ export default class Curve25519 {
 			sk,
 			pk,
 		}
+	}
+
+	/**
+	 * Converts a ed25519 public key to Curve25519 to be used in
+	 * Diffie-Hellman key exchange
+	 */
+	convertEd25519PublicKeyToCurve25519(pk: Uint8Array) {
+		const z = new Uint8Array(32)
+		const q = [this.gf(), this.gf(), this.gf(), this.gf()]
+		const a = this.gf()
+		const b = this.gf()
+
+		if (this.unpackNeg(q, pk)) {
+			return null
+		}
+
+		const y = q[1]
+
+		this.A(a, this.gf1, y)
+		this.Z(b, this.gf1, y)
+		this.inv25519(b, b)
+		this.M(a, a, b)
+
+		this.pack25519(z, a)
+
+		return z
+	}
+
+	/**
+	 * Converts a ed25519 secret key to Curve25519 to be used in
+	 * Diffie-Hellman key exchange
+	 */
+	convertEd25519SecretKeyToCurve25519(sk: Uint8Array) {
+		const d = new Uint8Array(64)
+		const o = new Uint8Array(32)
+		let i
+
+		this.cryptoHash(d, sk, 32)
+		d[0] &= 248
+		d[31] &= 127
+		d[31] |= 64
+
+		for (i = 0; i < 32; i++) {
+			o[i] = d[i]
+		}
+
+		for (i = 0; i < 64; i++) {
+			d[i] = 0
+		}
+
+		return o
+	}
+
+	cryptoHash(out: Uint8Array, m: Uint8Array, n: number): number {
+		const input = new Uint8Array(n)
+		for (let i = 0; i < n; ++i) {
+			input[i] = m[i]
+		}
+
+		const hash = blake2b(input)
+		for (let i = 0; i < 64; ++i) {
+			out[i] = hash[i]
+		}
+
+		return 0
 	}
 
 }

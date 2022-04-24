@@ -8,17 +8,9 @@ const HARDENED_OFFSET = 0x80000000
 
 export default class Bip32KeyDerivation {
 
-	path: string
-	seed: string
-
-	constructor(path: string, seed: string) {
-		this.path = path
-		this.seed = seed
-	}
-
-	derivePath = (): Chain => {
-		const { key, chainCode } = this.getKeyFromSeed()
-		const segments = this.path
+	static derivePath = (path: string, seed: string): Chain => {
+		const { key, chainCode } = this.getKeyFromSeed(seed)
+		const segments = path
 			.split('/')
 			.map(v => v.replace('\'', ''))
 			.map(el => parseInt(el, 10))
@@ -29,13 +21,13 @@ export default class Bip32KeyDerivation {
 		)
 	}
 
-	private getKeyFromSeed = (): Chain => {
+	private static getKeyFromSeed = (seed: string): Chain => {
 		return this.derive(
-			enc.Hex.parse(this.seed),
+			enc.Hex.parse(seed),
 			enc.Utf8.parse(ED25519_CURVE))
 	}
 
-	private CKDPriv = ({ key, chainCode }: Chain, index: number) => {
+	private static CKDPriv = ({ key, chainCode }: Chain, index: number) => {
 		const ib = []
 		ib.push((index >> 24) & 0xff)
 		ib.push((index >> 16) & 0xff)
@@ -48,7 +40,7 @@ export default class Bip32KeyDerivation {
 			enc.Hex.parse(chainCode))
 	}
 
-	private derive = (data: string, base: string): Chain => {
+	private static derive = (data: string, base: string): Chain => {
 		const hmac = algo.HMAC.create(algo.SHA512, base)
 		const I = hmac.update(data).finalize().toString()
 		const IL = I.slice(0, I.length / 2)

@@ -3,15 +3,11 @@ import BigNumber from 'bignumber.js'
 import AddressGenerator from './lib/address-generator'
 import AddressImporter, { Account, Wallet } from './lib/address-importer'
 import BlockSigner, { BlockData, ReceiveBlock, RepresentativeBlock, SendBlock, SignedBlock } from './lib/block-signer'
+import Box from './lib/box'
 import NanoAddress from './lib/nano-address'
 import NanoConverter from './lib/nano-converter'
 import Signer from './lib/signer'
 import Convert from './lib/util/convert'
-
-const nanoAddress = new NanoAddress()
-const generator = new AddressGenerator()
-const importer = new AddressImporter()
-const signer = new Signer()
 
 const wallet = {
 
@@ -38,7 +34,7 @@ const wallet = {
 	 * @returns {Wallet} The wallet
 	 */
 	generate: (entropy?: string, seedPassword?: string): Wallet => {
-		return generator.generateWallet(entropy, seedPassword)
+		return AddressGenerator.generateWallet(entropy, seedPassword)
 	},
 
 	/**
@@ -57,7 +53,7 @@ const wallet = {
 	 * @returns {Wallet} The wallet
 	 */
 	generateLegacy: (seed?: string): Wallet => {
-		return generator.generateLegacyWallet(seed)
+		return AddressGenerator.generateLegacyWallet(seed)
 	},
 
 	/**
@@ -76,7 +72,7 @@ const wallet = {
 	 * @returns {Wallet} The wallet
 	 */
 	fromMnemonic: (mnemonic: string, seedPassword?: string): Wallet => {
-		return importer.fromMnemonic(mnemonic, seedPassword)
+		return AddressImporter.fromMnemonic(mnemonic, seedPassword)
 	},
 
 	/**
@@ -93,7 +89,7 @@ const wallet = {
 	 * @returns {Wallet} The wallet
 	 */
 	fromLegacyMnemonic: (mnemonic: string): Wallet => {
-		return importer.fromLegacyMnemonic(mnemonic)
+		return AddressImporter.fromLegacyMnemonic(mnemonic)
 	},
 
 	/**
@@ -110,7 +106,7 @@ const wallet = {
 	 * @returns {Wallet} The wallet, without the mnemonic phrase because it's not possible to infer backwards
 	 */
 	fromSeed: (seed: string): Wallet => {
-		return importer.fromSeed(seed)
+		return AddressImporter.fromSeed(seed)
 	},
 
 	/**
@@ -127,7 +123,7 @@ const wallet = {
 	 * @returns {Wallet} The wallet
 	 */
 	fromLegacySeed: (seed: string): Wallet => {
-		return importer.fromLegacySeed(seed)
+		return AddressImporter.fromLegacySeed(seed)
 	},
 
 	/**
@@ -143,7 +139,7 @@ const wallet = {
 	 * @returns {Account[]} a list of accounts
 	 */
 	accounts: (seed: string, from: number, to: number): Account[] => {
-		return importer.fromSeed(seed, from, to).accounts
+		return AddressImporter.fromSeed(seed, from, to).accounts
 	},
 
 	/**
@@ -158,12 +154,11 @@ const wallet = {
 	 * @returns {Account[]} a list of accounts
 	 */
 	legacyAccounts: (seed: string, from: number, to: number): Account[] => {
-		return importer.fromLegacySeed(seed, from, to).accounts
+		return AddressImporter.fromLegacySeed(seed, from, to).accounts
 	},
 
 }
 
-const blockSigner = new BlockSigner()
 const block = {
 
 	/**
@@ -185,7 +180,7 @@ const block = {
 	 * @returns {SignedBlock} the signed block
 	 */
 	send: (data: SendBlock, privateKey: string): SignedBlock => {
-		return blockSigner.send(data, privateKey)
+		return BlockSigner.send(data, privateKey)
 	},
 
 
@@ -208,7 +203,7 @@ const block = {
 	 * @returns {SignedBlock} the signed block
 	 */
 	receive: (data: ReceiveBlock, privateKey: string): SignedBlock => {
-		return blockSigner.receive(data, privateKey)
+		return BlockSigner.receive(data, privateKey)
 	},
 
 
@@ -236,7 +231,7 @@ const block = {
 			toAddress: 'nano_1111111111111111111111111111111111111111111111111111hifc8npp', // Burn address
 		}
 
-		return blockSigner.send(block, privateKey)
+		return BlockSigner.send(block, privateKey)
 	},
 
 }
@@ -266,7 +261,7 @@ const tools = {
 	 */
 	sign: (privateKey: string, ...input: string[]): string => {
 		const data = input.map(Convert.stringToHex)
-		return signer.sign(privateKey, ...data)
+		return Signer.sign(privateKey, ...data)
 	},
 
 	/**
@@ -279,7 +274,7 @@ const tools = {
 	 */
 	verify: (publicKey: string, signature: string, ...input: string[]): boolean => {
 		const data = input.map(Convert.stringToHex)
-		return signer.verify(publicKey, signature, ...data)
+		return Signer.verify(publicKey, signature, ...data)
 	},
 
 	/**
@@ -291,11 +286,11 @@ const tools = {
 	 */
 	verifyBlock: (publicKey: string, block: BlockData): boolean => {
 		const preamble = 0x6.toString().padStart(64, '0')
-		return signer.verify(publicKey, block.signature,
+		return Signer.verify(publicKey, block.signature,
 				preamble,
-				nanoAddress.nanoAddressToHexString(block.account),
+				NanoAddress.nanoAddressToHexString(block.account),
 				block.previous,
-				nanoAddress.nanoAddressToHexString(block.representative),
+				NanoAddress.nanoAddressToHexString(block.representative),
 				Convert.dec2hex(block.balance, 16).toUpperCase(),
 				block.link)
 	},
@@ -307,7 +302,7 @@ const tools = {
 	 * @returns {boolean} valid or not
 	 */
 	validateAddress: (input: string): boolean => {
-		return nanoAddress.validateNanoAddress(input)
+		return NanoAddress.validateNanoAddress(input)
 	},
 
 	/**
@@ -317,7 +312,7 @@ const tools = {
 	 * @returns {boolean} valid or not
 	 */
 	validateMnemonic: (input: string): boolean => {
-		return importer.validateMnemonic(input)
+		return AddressImporter.validateMnemonic(input)
 	},
 
 	/**
@@ -327,11 +322,7 @@ const tools = {
 	 * @returns {string} the public key
 	 */
 	addressToPublicKey: (input: string): string => {
-		const cleaned = input
-			.replace('nano_', '')
-			.replace('xrb_', '')
-		const publicKeyBytes = nanoAddress.decodeNanoBase32(cleaned)
-		return Convert.ab2hex(publicKeyBytes).slice(0, 64)
+		return NanoAddress.addressToPublicKey(input)
 	},
 
 	/**
@@ -341,7 +332,7 @@ const tools = {
 	 * @returns {string} the nano address
 	 */
 	publicKeyToAddress: (input: string): string => {
-		return nanoAddress.deriveAddress(input)
+		return NanoAddress.deriveAddress(input)
 	},
 
 	/**
@@ -352,11 +343,50 @@ const tools = {
 	 */
 	blake2b: (input: string | string[]): string => {
 		if (Array.isArray(input)) {
-			return Convert.ab2hex(signer.generateHash(input.map(Convert.stringToHex)))
+			return Convert.ab2hex(Signer.generateHash(input.map(Convert.stringToHex)))
 		} else {
-			return Convert.ab2hex(signer.generateHash([Convert.stringToHex(input)]))
+			return Convert.ab2hex(Signer.generateHash([Convert.stringToHex(input)]))
 		}
 	},
+
+}
+
+const box = {
+
+	/**
+	 * Encrypt a message using a Nano address private key for
+	 * end-to-end encrypted messaging.
+	 *
+	 * Encrypts the message using the recipient's public key,
+	 * the sender's private key and a random nonce generated
+	 * inside the library. The message can be opened with the
+	 * recipient's private key and the sender's public key by
+	 * using the decrypt method.
+	 *
+	 * @param {string} message string to encrypt
+	 * @param {string} address nano address of the recipient
+	 * @param {string} privateKey private key of the sender
+	 * @returns {string} encrypted message encoded in Base64
+	 */
+	encrypt: (message: string, address: string, privateKey: string): string => {
+		return Box.encrypt(message, address, privateKey)
+	},
+
+	/**
+	 * Decrypt a message using a Nano address private key.
+	 *
+	 * Decrypts the message by using the sender's public key,
+	 * the recipient's private key and the nonce which is included
+	 * in the encrypted message.
+	 *
+	 * @param {string} encrypted string to decrypt
+	 * @param {string} address nano address of the sender
+	 * @param {string} privateKey private key of the recipient
+	 * @returns {string} decrypted message encoded in UTF-8
+	 */
+	decrypt: (encrypted: string, address: string, privateKey: string): string => {
+		return Box.decrypt(encrypted, address, privateKey)
+	}
 
 }
 
@@ -364,4 +394,5 @@ export {
 	wallet,
 	block,
 	tools,
+	box,
 }

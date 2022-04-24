@@ -7,19 +7,13 @@ import words from './words'
 
 export default class Bip39Mnemonic {
 
-	password: string
-
-	constructor(password?: string) {
-		this.password = password
-	}
-
 	/**
 	 * Creates a BIP39 wallet
 	 *
 	 * @param {string} [entropy] - (Optional) the entropy to use instead of generating
 	 * @returns {MnemonicSeed} The mnemonic phrase and a seed derived from the (generated) entropy
 	 */
-	createWallet = (entropy: string): MnemonicSeed => {
+	static createWallet = (entropy: string, password: string): MnemonicSeed => {
 		if (entropy) {
 			if (entropy.length !== 64) {
 				throw new Error('Invalid entropy length, must be a 64 byte hexadecimal string')
@@ -34,7 +28,7 @@ export default class Bip39Mnemonic {
 		}
 
 		const mnemonic = this.deriveMnemonic(entropy)
-		const seed = this.mnemonicToSeed(mnemonic)
+		const seed = this.mnemonicToSeed(mnemonic, password)
 
 		return {
 			mnemonic,
@@ -48,7 +42,7 @@ export default class Bip39Mnemonic {
 	 * @param {string} seed - (Optional) the seed to be used for the wallet
 	 * @returns {MnemonicSeed} The mnemonic phrase and a generated seed if none provided
 	 */
-	createLegacyWallet = (seed?: string): MnemonicSeed => {
+	static createLegacyWallet = (seed?: string): MnemonicSeed => {
 		if (seed) {
 			if (seed.length !== 64) {
 				throw new Error('Invalid entropy length, must be a 64 byte hexadecimal string')
@@ -70,7 +64,7 @@ export default class Bip39Mnemonic {
 		}
 	}
 
-	deriveMnemonic = (entropy: string): string => {
+	static deriveMnemonic = (entropy: string): string => {
 		const entropyBinary = Convert.hexStringToBinary(entropy)
 		const entropySha256Binary = Convert.hexStringToBinary(this.calculateChecksum(entropy))
 		const entropyBinaryWithChecksum = entropyBinary + entropySha256Binary
@@ -89,7 +83,7 @@ export default class Bip39Mnemonic {
 	 * @param {string} mnemonic - The mnemonic phrase to validate
 	 * @returns {boolean} Is the mnemonic phrase valid
 	 */
-	validateMnemonic = (mnemonic: string): boolean => {
+	static validateMnemonic = (mnemonic: string): boolean => {
 		const wordArray = Util.normalizeUTF8(mnemonic).split(' ')
 		if (wordArray.length % 3 !== 0) {
 			return false
@@ -136,7 +130,7 @@ export default class Bip39Mnemonic {
 	 *
 	 * @param {string} mnemonic Mnemonic phrase separated by spaces
 	 */
-	mnemonicToLegacySeed = (mnemonic: string): string => {
+	static mnemonicToLegacySeed = (mnemonic: string): string => {
 		const wordArray = Util.normalizeUTF8(mnemonic).split(' ')
 		const bits = wordArray.map((w: string) => {
 			const wordIndex = words.indexOf(w)
@@ -159,9 +153,9 @@ export default class Bip39Mnemonic {
 	 *
 	 * @param {string} mnemonic Mnemonic phrase separated by spaces
 	 */
-	mnemonicToSeed = (mnemonic: string): string => {
+	static mnemonicToSeed = (mnemonic: string, password: string): string => {
 		const normalizedMnemonic = Util.normalizeUTF8(mnemonic)
-		const normalizedPassword = 'mnemonic' + Util.normalizeUTF8(this.password)
+		const normalizedPassword = 'mnemonic' + Util.normalizeUTF8(password)
 
 		return PBKDF2(
 			normalizedMnemonic,
@@ -174,11 +168,11 @@ export default class Bip39Mnemonic {
 			.toString(enc.Hex)
 	}
 
-	private randomHex = (length: number): string => {
-		return lib.WordArray.random(length / 2).toString()
+	private static randomHex = (length: number): string => {
+		return lib.WordArray.random(length).toString()
 	}
 
-	private calculateChecksum = (entropyHex: string): string => {
+	private static calculateChecksum = (entropyHex: string): string => {
 		const entropySha256 = SHA256(enc.Hex.parse(entropyHex)).toString()
 		return entropySha256.substr(0, entropySha256.length / 32)
 	}

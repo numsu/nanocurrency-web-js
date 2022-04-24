@@ -5,10 +5,10 @@ import Convert from './util/convert'
 
 export default class NanoAddress {
 
-	readonly alphabet = '13456789abcdefghijkmnopqrstuwxyz'
-	readonly prefix = 'nano_'
+	static readonly alphabet = '13456789abcdefghijkmnopqrstuwxyz'
+	static readonly prefix = 'nano_'
 
-	deriveAddress = (publicKey: string): string => {
+	static deriveAddress = (publicKey: string): string => {
 		const publicKeyBytes = Convert.hex2ab(publicKey)
 		const checksum = blake2b(publicKeyBytes, undefined, 5).reverse()
 		const encoded = this.encodeNanoBase32(publicKeyBytes)
@@ -17,7 +17,7 @@ export default class NanoAddress {
 		return this.prefix + encoded + encodedChecksum
 	}
 
-	encodeNanoBase32 = (publicKey: Uint8Array): string => {
+	static encodeNanoBase32 = (publicKey: Uint8Array): string => {
 		const length = publicKey.length
 		const leftover = (length * 8) % 5
 		const offset = leftover === 0 ? 0 : 5 - leftover
@@ -43,7 +43,15 @@ export default class NanoAddress {
 		return output
 	}
 
-	decodeNanoBase32 = (input: string): Uint8Array => {
+	static addressToPublicKey = (input: string): string => {
+		const cleaned = input
+			.replace('nano_', '')
+			.replace('xrb_', '')
+		const publicKeyBytes = NanoAddress.decodeNanoBase32(cleaned)
+		return Convert.ab2hex(publicKeyBytes).slice(0, 64)
+	}
+
+	static decodeNanoBase32 = (input: string): Uint8Array => {
 		const length = input.length
 		const leftover = (length * 5) % 8
 		const offset = leftover === 0 ? 0 : 8 - leftover
@@ -81,7 +89,7 @@ export default class NanoAddress {
 	 *
 	 * @param {string} address Nano address
 	 */
-	validateNanoAddress = (address: string): boolean => {
+	static validateNanoAddress = (address: string): boolean => {
 		if (address === undefined) {
 			throw Error('Address must be defined.')
 		}
@@ -100,7 +108,7 @@ export default class NanoAddress {
 		}
 
 		const expectedChecksum = address.slice(-8)
-		const publicKey = address.slice(address.indexOf('_') + 1, -8)
+		const publicKey = this.stripAddress(address)
 		const publicKeyBuffer = this.decodeNanoBase32(publicKey)
 		const actualChecksumBuffer = blake2b(publicKeyBuffer, null, 5).reverse()
 		const actualChecksum = this.encodeNanoBase32(actualChecksumBuffer)
@@ -108,7 +116,7 @@ export default class NanoAddress {
 		return expectedChecksum === actualChecksum
 	}
 
-	nanoAddressToHexString = (addr: string): string => {
+	static nanoAddressToHexString = (addr: string): string => {
 		addr = addr.slice(-60)
 		const isValid = /^[13456789abcdefghijkmnopqrstuwxyz]+$/.test(addr)
 		if (isValid) {
@@ -125,7 +133,11 @@ export default class NanoAddress {
 		}
 	}
 
-	private readChar(char: string): number {
+	static stripAddress(address: string): string {
+		return address.slice(address.indexOf('_') + 1, -8)
+	}
+
+	private static readChar(char: string): number {
 		const idx = this.alphabet.indexOf(char)
 
 		if (idx === -1) {

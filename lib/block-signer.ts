@@ -1,8 +1,5 @@
 import BigNumber from 'bignumber.js'
-//@ts-ignore
-import { blake2b } from 'blakejs'
 
-import Ed25519 from './ed25519'
 import NanoAddress from './nano-address'
 import NanoConverter from './nano-converter'
 import Signer from './signer'
@@ -10,11 +7,7 @@ import Convert from './util/convert'
 
 export default class BlockSigner {
 
-	nanoAddress = new NanoAddress()
-	ed25519 = new Ed25519()
-	signer = new Signer()
-
-	preamble: string = 0x6.toString().padStart(64, '0')
+	static readonly preamble: string = 0x6.toString().padStart(64, '0')
 
 	/**
 	 * Sign a receive block
@@ -23,7 +16,7 @@ export default class BlockSigner {
 	 * @param {string} privateKey Private key to sign the data with
 	 * @returns {SignedBlock} the signed block to publish to the blockchain
 	 */
-	receive(data: ReceiveBlock, privateKey: string): SignedBlock {
+	static receive = (data: ReceiveBlock, privateKey: string): SignedBlock => {
 		const validateInputRaw = (input: string) => !!input && !isNaN(+input)
 		if (!validateInputRaw(data.walletBalanceRaw)) {
 			throw new Error('Invalid format in wallet balance')
@@ -33,11 +26,11 @@ export default class BlockSigner {
 			throw new Error('Invalid format in send amount')
 		}
 
-		if (!this.nanoAddress.validateNanoAddress(data.toAddress)) {
+		if (!NanoAddress.validateNanoAddress(data.toAddress)) {
 			throw new Error('Invalid toAddress')
 		}
 
-		if (!this.nanoAddress.validateNanoAddress(data.representativeAddress)) {
+		if (!NanoAddress.validateNanoAddress(data.representativeAddress)) {
 			throw new Error('Invalid representativeAddress')
 		}
 
@@ -58,11 +51,11 @@ export default class BlockSigner {
 		const newBalanceNano = new BigNumber(balanceNano).plus(new BigNumber(amountNano))
 		const newBalanceRaw = NanoConverter.convert(newBalanceNano, 'NANO', 'RAW')
 		const newBalanceHex = Convert.dec2hex(newBalanceRaw, 16).toUpperCase()
-		const account = this.nanoAddress.nanoAddressToHexString(data.toAddress)
+		const account = NanoAddress.nanoAddressToHexString(data.toAddress)
 		const link = data.transactionHash
-		const representative = this.nanoAddress.nanoAddressToHexString(data.representativeAddress)
+		const representative = NanoAddress.nanoAddressToHexString(data.representativeAddress)
 
-		const signature = this.signer.sign(
+		const signature = Signer.sign(
 				privateKey,
 				this.preamble,
 				account,
@@ -90,7 +83,7 @@ export default class BlockSigner {
 	 * @param {string} privateKey Private key to sign the data with
 	 * @returns {SignedBlock} the signed block to publish to the blockchain
 	 */
-	send(data: SendBlock, privateKey: string): SignedBlock {
+	static send = (data: SendBlock, privateKey: string): SignedBlock => {
 		const validateInputRaw = (input: string) => !!input && !isNaN(+input)
 		if (!validateInputRaw(data.walletBalanceRaw)) {
 			throw new Error('Invalid format in wallet balance')
@@ -100,15 +93,15 @@ export default class BlockSigner {
 			throw new Error('Invalid format in send amount')
 		}
 
-		if (!this.nanoAddress.validateNanoAddress(data.toAddress)) {
+		if (!NanoAddress.validateNanoAddress(data.toAddress)) {
 			throw new Error('Invalid toAddress')
 		}
 
-		if (!this.nanoAddress.validateNanoAddress(data.fromAddress)) {
+		if (!NanoAddress.validateNanoAddress(data.fromAddress)) {
 			throw new Error('Invalid fromAddress')
 		}
 
-		if (!this.nanoAddress.validateNanoAddress(data.representativeAddress)) {
+		if (!NanoAddress.validateNanoAddress(data.representativeAddress)) {
 			throw new Error('Invalid representativeAddress')
 		}
 
@@ -125,11 +118,11 @@ export default class BlockSigner {
 		const newBalanceNano = new BigNumber(balanceNano).minus(new BigNumber(amountNano))
 		const newBalanceRaw = NanoConverter.convert(newBalanceNano, 'NANO', 'RAW')
 		const newBalanceHex = Convert.dec2hex(newBalanceRaw, 16).toUpperCase()
-		const account = this.nanoAddress.nanoAddressToHexString(data.fromAddress)
-		const link = this.nanoAddress.nanoAddressToHexString(data.toAddress)
-		const representative = this.nanoAddress.nanoAddressToHexString(data.representativeAddress)
+		const account = NanoAddress.nanoAddressToHexString(data.fromAddress)
+		const link = NanoAddress.nanoAddressToHexString(data.toAddress)
+		const representative = NanoAddress.nanoAddressToHexString(data.representativeAddress)
 
-		const signature = this.signer.sign(
+		const signature = Signer.sign(
 				privateKey,
 				this.preamble,
 				account,
