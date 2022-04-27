@@ -33,7 +33,7 @@ npm install nanocurrency-web
 ### In web
 
 ```html
-<script src="https://unpkg.com/nanocurrency-web@1.4.2" type="text/javascript"></script>
+<script src="https://unpkg.com/nanocurrency-web@1.4.3" type="text/javascript"></script>
 <script type="text/javascript">
     NanocurrencyWeb.wallet.generate(...);
 </script>
