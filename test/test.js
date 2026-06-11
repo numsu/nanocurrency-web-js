@@ -1,7 +1,11 @@
 'use strict'
 
-const expect = require('chai').expect
+let expect
 const { wallet, block, tools, box } = require('../dist/index')
+
+before(async () => {
+	({ expect } = await import('chai'))
+})
 
 // WARNING: Do not send any funds to the test vectors below
 describe('generate wallet test', () => {

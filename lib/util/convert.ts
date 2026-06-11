@@ -64,8 +64,9 @@ export default class Convert {
 	 * @param {Uint8Array} bin Array of bytes
 	 * @return {String} Hex encoded string
 	 */
-	static ab2hex = (buf: ArrayBuffer): string => {
-		return Array.prototype.map.call(new Uint8Array(buf), x => ('00' + x.toString(16)).slice(-2)).join('')
+	static ab2hex = (buf: ArrayBufferLike | Uint8Array): string => {
+		const bytes = buf instanceof Uint8Array ? buf : new Uint8Array(buf)
+		return Array.prototype.map.call(bytes, x => ('00' + x.toString(16)).slice(-2)).join('')
 	}
 
 	/**

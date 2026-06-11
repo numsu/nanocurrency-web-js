@@ -4,6 +4,7 @@
 		"module": "commonjs",
 		"declaration": true,
 		"outDir": "./dist",
+		"ignoreDeprecations": "6.0",
 		"strict": true,
 		"esModuleInterop": true,
 		"downlevelIteration": true,
