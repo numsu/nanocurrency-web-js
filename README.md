@@ -206,7 +206,7 @@ const signedBlock = block.representative(data, privateKey)
 
 #### Converting Nano units
 
-Supported unit values are RAW, NANO, MRAI, KRAI, RAW.
+Supported unit values are `RAW` and `NANO`.
 
 ```javascript
 import { tools } from 'nanocurrency-web'

@@ -5,7 +5,7 @@ import AddressImporter, { Account, Wallet } from './lib/address-importer'
 import BlockSigner, { BlockData, ReceiveBlock, RepresentativeBlock, SendBlock, SignedBlock } from './lib/block-signer'
 import Box from './lib/box'
 import NanoAddress from './lib/nano-address'
-import NanoConverter from './lib/nano-converter'
+import NanoConverter, { Unit } from './lib/nano-converter'
 import Signer from './lib/signer'
 import Convert from './lib/util/convert'
 
@@ -241,14 +241,14 @@ const tools = {
 	/**
 	 * Convert Nano values
 	 *
-	 * Possible units are RAW, NANO, MRAI, KRAI, RAI
+	 * Possible units are RAW and NANO
 	 *
 	 * @param {string | BigNumber} input The input value
-	 * @param {string} inputUnit The unit of the input value
-	 * @param {string} outputUnit The unit you wish to convert to
+	 * @param {Unit} inputUnit The unit of the input value
+	 * @param {Unit} outputUnit The unit you wish to convert to
 	 * @returns {string} The converted value
 	 */
-	convert: (input: string | BigNumber, inputUnit: string, outputUnit: string): string => {
+	convert: (input: string | BigNumber, inputUnit: Unit, outputUnit: Unit): string => {
 		return NanoConverter.convert(input, inputUnit, outputUnit)
 	},
 
