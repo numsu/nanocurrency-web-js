@@ -1,6 +1,6 @@
 const path = require('path')
 
-module.exports = {
+const baseConfig = {
 	entry: './index.ts',
 	mode: 'production',
 	module: {
@@ -15,10 +15,24 @@ module.exports = {
 	resolve: {
 		extensions: ['.ts', '.js', '.json'],
 	},
-	output: {
-		filename: 'index.min.js',
-		path: path.resolve(__dirname, 'dist'),
-		libraryTarget: 'var',
-		library: 'NanocurrencyWeb',
-	},
 }
+
+module.exports = [
+	{
+		...baseConfig,
+		output: {
+			filename: 'index.js',
+			path: path.resolve(__dirname, 'dist'),
+			libraryTarget: 'commonjs2',
+		},
+	},
+	{
+		...baseConfig,
+		output: {
+			filename: 'index.min.js',
+			path: path.resolve(__dirname, 'dist'),
+			libraryTarget: 'var',
+			library: 'NanocurrencyWeb',
+		},
+	},
+]

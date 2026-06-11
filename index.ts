@@ -22,7 +22,7 @@ const wallet = {
 	 * The Nano address is derived from the public key using standard Nano encoding.
 	 * The address is prefixed with 'nano_'.
 	 *
-	 * Generation uses CryptoJS to generate random entropy by default. You can give your own entropy
+	 * Generation uses a cryptographically secure random source by default. You can give your own entropy
 	 * as a parameter and it will be used instead.
 	 *
 	 * An optional seed password can be used to encrypt the mnemonic phrase so the seed
@@ -46,7 +46,7 @@ const wallet = {
 	 * The Nano address is derived from the public key using standard Nano encoding.
 	 * The address is prefixed with 'nano_'.
 	 *
-	 * Generation uses CryptoJS to generate random seed by default. You can give your own seed
+	 * Generation uses a cryptographically secure random source by default. You can give your own seed
 	 * as a parameter and it will be used instead.
 	 *
 	 * @param {string} [seed] - (Optional) 64 byte hexadecimal string seed to be used instead of generating it

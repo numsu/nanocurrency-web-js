@@ -27,15 +27,15 @@
 	"types": "dist/index.d.ts",
 	"unpkg": "dist/index.min.js",
 	"scripts": {
-		"build": "rm -rf dist && tsc && npm run build:webpack",
+		"build": "rm -rf dist && tsc --emitDeclarationOnly && npm run build:webpack",
 		"build:webpack": "webpack",
 		"test": "mocha --reporter spec"
 	},
 	"dependencies": {
+		"@noble/hashes": "2.2.0",
 		"bignumber.js": "9.0.2",
 		"blakejs": "1.2.1",
-		"byte-base64": "1.1.0",
-		"crypto-js": "3.1.9-1"
+		"byte-base64": "1.1.0"
 	},
 	"devDependencies": {
 		"chai": "4.3.6",

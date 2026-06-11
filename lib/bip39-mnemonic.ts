@@ -1,7 +1,9 @@
-//@ts-ignore
-import { PBKDF2, SHA256, algo, enc, lib } from 'crypto-js'
+import { pbkdf2 } from '@noble/hashes/pbkdf2.js'
+import { sha256, sha512 } from '@noble/hashes/sha2.js'
+import { bytesToHex, utf8ToBytes } from '@noble/hashes/utils.js'
 
 import Convert from './util/convert'
+import { randomHex } from './util/secure-random'
 import Util from './util/util'
 import words from './words'
 
@@ -24,7 +26,7 @@ export default class Bip39Mnemonic {
 		}
 
 		if (!entropy) {
-			entropy = this.randomHex(32)
+			entropy = randomHex(32)
 		}
 
 		const mnemonic = this.deriveMnemonic(entropy)
@@ -53,7 +55,7 @@ export default class Bip39Mnemonic {
 		}
 
 		if (!seed) {
-			seed = this.randomHex(32)
+			seed = randomHex(32)
 		}
 
 		const mnemonic = this.deriveMnemonic(seed)
@@ -157,23 +159,18 @@ export default class Bip39Mnemonic {
 		const normalizedMnemonic = Util.normalizeUTF8(mnemonic)
 		const normalizedPassword = 'mnemonic' + Util.normalizeUTF8(password)
 
-		return PBKDF2(
-			normalizedMnemonic,
-			normalizedPassword,
+		return bytesToHex(pbkdf2(
+			sha512,
+			utf8ToBytes(normalizedMnemonic),
+			utf8ToBytes(normalizedPassword),
 			{
-				keySize: 512 / 32,
-				iterations: 2048,
-				hasher: algo.SHA512,
-			})
-			.toString(enc.Hex)
-	}
-
-	private static randomHex = (length: number): string => {
-		return lib.WordArray.random(length).toString()
+				c: 2048,
+				dkLen: 64,
+			}))
 	}
 
 	private static calculateChecksum = (entropyHex: string): string => {
-		const entropySha256 = SHA256(enc.Hex.parse(entropyHex)).toString()
+		const entropySha256 = bytesToHex(sha256(Convert.hex2ab(entropyHex)))
 		return entropySha256.substr(0, entropySha256.length / 32)
 	}
 
