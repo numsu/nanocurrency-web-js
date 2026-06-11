@@ -357,6 +357,17 @@ describe('Box tests', () => {
 		expect(this.message).to.equal(decrypted)
 	})
 
+	it('should encrypt and decrypt a message with a custom nonce', () => {
+		const nonce = '000102030405060708090a0b0c0d0e0f1011121314151617'
+		const encrypted = box.encrypt(this.message, this.alice.accounts[0].address, this.bob.accounts[0].privateKey, nonce)
+		const encrypted2 = box.encrypt(this.message, this.alice.accounts[0].address, this.bob.accounts[0].privateKey, nonce)
+
+		expect(encrypted).to.equal(encrypted2)
+
+		const decrypted = box.decrypt(encrypted, this.bob.accounts[0].address, this.alice.accounts[0].privateKey)
+		expect(this.message).to.equal(decrypted)
+	})
+
 	it('should fail to decrypt with wrong public key in encryption', () => {
 		// Encrypt with wrong public key
 		const aliceAccounts = wallet.legacyAccounts(this.alice.seed, 1, 2)

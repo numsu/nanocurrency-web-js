@@ -63,7 +63,7 @@ export default class AddressImporter {
 	 */
 	static fromSeed = (seed: string, from = 0, to = 0): Wallet => {
 		if (seed.length !== 128) {
-			throw new Error('Invalid seed length, must be a 128 byte hexadecimal string')
+			throw new Error('Invalid seed length, must be a 128 character hexadecimal string (64 bytes)')
 		}
 		if (!/^[0-9a-fA-F]+$/i.test(seed)) {
 			throw new Error('Seed is not a valid hexadecimal string')
@@ -89,7 +89,7 @@ export default class AddressImporter {
 	 */
 	static fromLegacySeed = (seed: string, from: number = 0, to: number = 0, mnemonic?: string): Wallet => {
 		if (seed.length !== 64) {
-			throw new Error('Invalid seed length, must be a 64 byte hexadecimal string')
+			throw new Error('Invalid seed length, must be a 64 character hexadecimal string (32 bytes)')
 		}
 		if (!/^[0-9a-fA-F]+$/i.test(seed)) {
 			throw new Error('Seed is not a valid hexadecimal string')

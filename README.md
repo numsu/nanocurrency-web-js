@@ -10,7 +10,7 @@ The toolkit supports creating and importing wallets and signing blocks on-device
 
 ## Features
 
-* Generate new HD wallets (BIP32/44 hierarchial deterministic) with a BIP39 mnemonic phrase (Used in Ledger hardware wallet)
+* Generate new HD wallets (BIP32/44 hierarchical deterministic) with a BIP39 mnemonic phrase (Used in Ledger hardware wallet)
 * Generate new "legacy" Nano wallets with mnemonic phrases (Used in the Natrium wallet)
 * Import HD wallets with a mnemonic phrase or a seed
 * Import "legacy" wallets with the Nano mnemonic phrase or seed
@@ -49,36 +49,48 @@ The wallet is a hexadecimal string called a seed. From this seed you can determi
 
 The library is able to generate, import and derive accounts for HD wallets and "legacy" Nano wallets. A HD wallet seed length is 128 hexadecimal characters while a "legacy" Nano wallet seed is 64 characters long.
 
-These are the two most common used wallets in different applications. A best bet would be to support both of them. For example, when an user wants to import a wallet, you could always generate both wallets and check if either wallet's account at index 0 has a frontier using [the accounts_frontiers RPC](https://docs.nano.org/commands/rpc-protocol/#accounts_frontiers) command.
+These are the two most common wallet formats used in different applications. A good default is to support both of them. For example, when a user wants to import a wallet, you could generate both wallets and check if either wallet's account at index 0 has a frontier using [the accounts_frontiers RPC](https://docs.nano.org/commands/rpc-protocol/#accounts_frontiers) command.
 
 ```javascript
 import { wallet } from 'nanocurrency-web'
 
 // Generates a new wallet with a mnemonic phrase, seed and an account
-// You can also generate your own entropy for the mnemonic or set a seed password
+// You can also generate your own entropy for the mnemonic or set a seed password.
+// Custom entropy must be a 64 character hexadecimal string (32 bytes).
+// If secure randomness is unavailable in the runtime, this call throws and you must
+// provide custom entropy yourself.
 // Notice, that losing the password will make the mnemonic phrase void
 const wallet = wallet.generate(entropy?, password?)
 
 // Generates a legacy wallet with a mnemonic phrase, seed and an account
-// You can provide your own seed to be used instead
+// You can provide your own seed to be used instead.
+// Custom seed must be a 64 character hexadecimal string (32 bytes).
+// If secure randomness is unavailable in the runtime, this call throws and you must
+// provide a custom seed yourself.
 const wallet = wallet.generateLegacy(seed?)
 
 // Import a wallet with the mnemonic phrase
+// Words must be separated by spaces.
 const wallet = wallet.fromMnemonic(mnemonic, seedPassword?)
 
 // Import a wallet with the legacy mnemonic phrase
+// Words must be separated by spaces.
 const wallet = wallet.fromLegacyMnemonic(mnemonic)
 
 // Import a wallet with a seed, the mnemonic phrase will be undefined since it's not possible to infer it from the seed
+// The seed must be a 128 character hexadecimal string (64 bytes).
 const wallet = wallet.fromSeed(seed)
 
 // Import a wallet with a legacy seed
+// The seed must be a 64 character hexadecimal string (32 bytes).
 const wallet = wallet.fromLegacySeed(seed)
 
-// Derive private keys for a seed, from and to are number indexes. The first account index is 0.
+// Derive private keys for a seed, from and to are number indexes. The seed must be a
+// 128 character hexadecimal string (64 bytes). The first account index is 0.
 const accounts = wallet.accounts(seed, from, to)
 
-// Derive private keys for a legacy seed, from and to are number indexes. The first account index is 0.
+// Derive private keys for a legacy seed, from and to are number indexes. The seed must be a
+// 64 character hexadecimal string (32 bytes). The first account index is 0.
 const accounts = wallet.legacyAccounts(seed, from, to)
 ```
 
@@ -219,7 +231,7 @@ const converted = tools.convert('1000000000000000000000000000000', 'RAW', 'NANO'
 ```
 
 #### Verifying signatures and signing anything with the private key
-Cryptocurrencies rely on asymmetric cryptographgy. This means that you can use the public key to validate the signature of the block that is signed with the private key.
+Cryptocurrencies rely on asymmetric cryptography. This means that you can use the public key to validate the signature of a block or message that was signed with the private key.
 
 For example implementing client side login with the password being the user's e-mail signed with their private key:
 
@@ -229,7 +241,7 @@ import { tools } from 'nanocurrency-web'
 const privateKey = '781186FB9EF17DB6E3D1056550D9FAE5D5BBADA6A6BC370E4CBB938B1DC71DA3'
 const signed = tools.sign(privateKey, 'foo@bar.com')
 
-// On the backend, verify that the signed value matches the hashed signature in your database
+// On the backend, verify the signature against the original UTF-8 string
 ```
 
 You can also validate Nano blocks:
@@ -239,7 +251,7 @@ import { tools } from 'nanocurrency-web'
 const valid = tools.verifyBlock(publicKey, block)
 ```
 
-You are able to challenge an user to prove ownership of a Nano address simply by making the user sign any string with the private key and then validating the signature with the public key. You are even able to derive the public key from the Nano address.
+You can challenge a user to prove ownership of a Nano address by making the user sign any UTF-8 string with the private key and then validating the signature with the public key. You can also derive the public key from the Nano address.
 ```javascript
 import { tools } from 'nanocurrency-web'
 
@@ -271,13 +283,23 @@ const valid = tools.validateMnemonic('edge defense waste choose enrich upon flee
 ```
 
 #### Encrypting and decrypting strings
-You are able to encrypt and decrypt strings to implement end-to-end encryption using the Diffie-Hellman key exchange by using the Nano address and private key. The public and private keys are converted to Curve25519 keys which are suitable for encryption within the library.
+You can encrypt and decrypt UTF-8 strings to implement end-to-end encryption using the Nano address and private key. The public and private keys are converted to Curve25519 keys inside the library, and the encrypted output is returned as Base64. You may also provide a custom nonce as a 48 character hexadecimal string (24 bytes).
 
 ```javascript
 import { box } from 'nanocurrency-web'
 
 // Encrypt on device 1
+// If you do not provide a custom nonce, this throws if the runtime does not provide
+// a secure random implementation for nonce generation.
 const encrypted = box.encrypt(message, recipientAddress, senderPrivateKey)
+
+// Encrypt with a custom nonce
+const encryptedWithCustomNonce = box.encrypt(
+  message,
+  recipientAddress,
+  senderPrivateKey,
+  nonce,
+)
 
 // Send the encrypted message to the recipient and decrypt on device 2
 const decrypted = box.decrypt(encrypted, senderAddress, recipientPrivateKey)

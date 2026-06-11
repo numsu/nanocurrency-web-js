@@ -10,9 +10,18 @@ export default class Box {
 
 	static readonly NONCE_LENGTH = 24
 
-	static encrypt(message: string, address: string, privateKey: string) {
+	static encrypt(message: string, address: string, privateKey: string, nonce?: string) {
 		if (!message) {
 			throw new Error('No message to encrypt')
+		}
+
+		if (nonce) {
+			if (nonce.length !== this.NONCE_LENGTH * 2) {
+				throw new Error('Invalid nonce length, must be a 48 character hexadecimal string (24 bytes)')
+			}
+			if (!/^[0-9a-fA-F]+$/i.test(nonce)) {
+				throw new Error('Nonce is not a valid hexadecimal string')
+			}
 		}
 
 		const publicKey = NanoAddress.addressToPublicKey(address)
@@ -21,17 +30,17 @@ export default class Box {
 			publicKey,
 		})
 
-		const nonce = randomBytes(this.NONCE_LENGTH)
+		const nonceBytes = nonce ? Convert.hex2ab(nonce) : randomBytes(this.NONCE_LENGTH)
 		const encrypted = new Curve25519().box(
 			Convert.decodeUTF8(message),
-			nonce,
+			nonceBytes,
 			Convert.hex2ab(convertedPublicKey),
 			Convert.hex2ab(convertedPrivateKey),
 		)
 
-		const full = new Uint8Array(nonce.length + encrypted.length)
-		full.set(nonce)
-		full.set(encrypted, nonce.length)
+		const full = new Uint8Array(nonceBytes.length + encrypted.length)
+		full.set(nonceBytes)
+		full.set(encrypted, nonceBytes.length)
 
 		return base64.bytesToBase64(full)
 	}

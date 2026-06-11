@@ -16,7 +16,7 @@ const wallet = {
 	 *
 	 * This function generates a wallet from random entropy. Wallet includes
 	 * a BIP39 mnemonic phrase in line with the Nano Ledger implementation and
-	 * a seed, the account is derived using BIP32 deterministic hierarchial algorithm
+	 * a seed, the account is derived using the BIP32 deterministic hierarchical algorithm
 	 * with input parameters 44'/165' and index 0.
 	 *
 	 * The Nano address is derived from the public key using standard Nano encoding.
@@ -24,12 +24,14 @@ const wallet = {
 	 *
 	 * Generation uses a cryptographically secure random source by default. You can give your own entropy
 	 * as a parameter and it will be used instead.
+	 * If the runtime does not provide a secure random implementation, this function throws and the
+	 * developer must provide custom entropy instead.
 	 *
 	 * An optional seed password can be used to encrypt the mnemonic phrase so the seed
 	 * cannot be derived correctly without the password. Recovering the wallet without the
 	 * password is not possible.
 	 *
-	 * @param {string} [entropy] - (Optional) 64 byte hexadecimal string entropy to be used instead of generating it
+	 * @param {string} [entropy] - (Optional) 64 character hexadecimal string entropy (32 bytes) to be used instead of generating it
 	 * @param {string} [seedPassword] - (Optional) seed password
 	 * @returns {Wallet} The wallet
 	 */
@@ -48,8 +50,10 @@ const wallet = {
 	 *
 	 * Generation uses a cryptographically secure random source by default. You can give your own seed
 	 * as a parameter and it will be used instead.
+	 * If the runtime does not provide a secure random implementation, this function throws and the
+	 * developer must provide a custom seed instead.
 	 *
-	 * @param {string} [seed] - (Optional) 64 byte hexadecimal string seed to be used instead of generating it
+	 * @param {string} [seed] - (Optional) 64 character hexadecimal string seed (32 bytes) to be used instead of generating it
 	 * @returns {Wallet} The wallet
 	 */
 	generateLegacy: (seed?: string): Wallet => {
@@ -60,7 +64,7 @@ const wallet = {
 	 * Import a Nano cryptocurrency wallet from a mnemonic phrase
 	 *
 	 * This function imports a wallet from a mnemonic phrase. Wallet includes the mnemonic phrase,
-	 * a seed derived with BIP39 standard and an account derived using BIP32 deterministic hierarchial
+	 * a seed derived with the BIP39 standard and an account derived using the BIP32 deterministic hierarchical
 	 * algorithm with input parameters 44'/165' and index 0.
 	 *
 	 * The Nano address is derived from the public key using standard Nano encoding.
@@ -96,13 +100,12 @@ const wallet = {
 	 * Import a Nano cryptocurrency wallet from a seed
 	 *
 	 * This function imports a wallet from a seed. Wallet includes the seed and an account derived using
-	 * BIP39 standard and an account derived using BIP32 deterministic hierarchial algorithm with input
-	 * parameters 44'/165' and index 0.
+	 * the BIP32 deterministic hierarchical algorithm with input parameters 44'/165' and index 0.
 	 *
 	 * The Nano address is derived from the public key using standard Nano encoding.
 	 * The address is prefixed with 'nano_'.
 	 *
-	 * @param {string} seed - The seed
+	 * @param {string} seed - A 128 character hexadecimal string seed (64 bytes)
 	 * @returns {Wallet} The wallet, without the mnemonic phrase because it's not possible to infer backwards
 	 */
 	fromSeed: (seed: string): Wallet => {
@@ -119,7 +122,7 @@ const wallet = {
 	 * The Nano address is derived from the public key using standard Nano encoding.
 	 * The address is prefixed with 'nano_'.
 	 *
-	 * @param {string} seed - The seed
+	 * @param {string} seed - A 64 character hexadecimal string seed (32 bytes)
 	 * @returns {Wallet} The wallet
 	 */
 	fromLegacySeed: (seed: string): Wallet => {
@@ -129,11 +132,11 @@ const wallet = {
 	/**
 	 * Derive accounts for the seed
 	 *
-	 * This function derives Nano accounts with the BIP32 deterministic hierarchial algorithm
+	 * This function derives Nano accounts with the BIP32 deterministic hierarchical algorithm
 	 * from the given seed with input parameters 44'/165' and indexes based on the from and to
 	 * parameters.
 	 *
-	 * @param {string} seed - The seed
+	 * @param {string} seed - A 128 character hexadecimal string seed (64 bytes)
 	 * @param {number} from - The start index
 	 * @param {number} to - The end index
 	 * @returns {Account[]} a list of accounts
@@ -148,7 +151,7 @@ const wallet = {
 	 * This function derives Nano accounts with the given seed with indexes
 	 * based on the from and to parameters.
 	 *
-	 * @param {string} seed - The seed
+	 * @param {string} seed - A 64 character hexadecimal string seed (32 bytes)
 	 * @param {number} from - The start index
 	 * @param {number} to - The end index
 	 * @returns {Account[]} a list of accounts
@@ -265,7 +268,7 @@ const tools = {
 	},
 
 	/**
-	 * Verifies the signature of any input string
+	 * Verify a signed block using the public key
 	 *
 	 * @param {string} publicKey The public key to verify with
 	 * @param {string} signature The signature to verify
@@ -298,7 +301,7 @@ const tools = {
 	/**
 	 * Validate a Nano address
 	 *
-	 * @param {string} input The address to validate
+	 * @param {string} input The mnemonic phrase to validate
 	 * @returns {boolean} valid or not
 	 */
 	validateAddress: (input: string): boolean => {
@@ -328,7 +331,7 @@ const tools = {
 	/**
 	 * Convert a public key to a Nano address
 	 *
-	 * @param {string} input Public key to convert
+	 * @param {string} input 64 character hexadecimal public key to convert
 	 * @returns {string} the nano address
 	 */
 	publicKeyToAddress: (input: string): string => {
@@ -338,8 +341,8 @@ const tools = {
 	/**
 	 * Hash a string or array of strings with blake2b
 	 *
-	 * @param {string | string[]} input string to hash
-	 * @returns {string} hashed string
+	 * @param {string | string[]} input UTF-8 string or list of UTF-8 strings to hash
+	 * @returns {string} Blake2b hash as a hexadecimal string
 	 */
 	blake2b: (input: string | string[]): string => {
 		if (Array.isArray(input)) {
@@ -363,13 +366,17 @@ const box = {
 	 * recipient's private key and the sender's public key by
 	 * using the decrypt method.
 	 *
-	 * @param {string} message string to encrypt
-	 * @param {string} address nano address of the recipient
-	 * @param {string} privateKey private key of the sender
+	 * If a custom nonce is not provided, this function throws if the runtime does not provide
+	 * a secure random implementation for nonce generation.
+	 *
+	 * @param {string} message UTF-8 string to encrypt
+	 * @param {string} address Nano address of the recipient
+	 * @param {string} privateKey 64 character hexadecimal private key of the sender
+	 * @param {string} [nonce] Optional 48 character hexadecimal nonce (24 bytes)
 	 * @returns {string} encrypted message encoded in Base64
 	 */
-	encrypt: (message: string, address: string, privateKey: string): string => {
-		return Box.encrypt(message, address, privateKey)
+	encrypt: (message: string, address: string, privateKey: string, nonce?: string): string => {
+		return Box.encrypt(message, address, privateKey, nonce)
 	},
 
 	/**
@@ -379,9 +386,9 @@ const box = {
 	 * the recipient's private key and the nonce which is included
 	 * in the encrypted message.
 	 *
-	 * @param {string} encrypted string to decrypt
-	 * @param {string} address nano address of the sender
-	 * @param {string} privateKey private key of the recipient
+	 * @param {string} encrypted Base64-encoded encrypted message to decrypt
+	 * @param {string} address Nano address of the sender
+	 * @param {string} privateKey 64 character hexadecimal private key of the recipient
 	 * @returns {string} decrypted message encoded in UTF-8
 	 */
 	decrypt: (encrypted: string, address: string, privateKey: string): string => {

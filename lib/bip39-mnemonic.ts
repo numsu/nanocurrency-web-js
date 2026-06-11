@@ -18,10 +18,10 @@ export default class Bip39Mnemonic {
 	static createWallet = (entropy: string, password: string): MnemonicSeed => {
 		if (entropy) {
 			if (entropy.length !== 64) {
-				throw new Error('Invalid entropy length, must be a 32 bit hexadecimal string')
+				throw new Error('Invalid entropy length, must be a 64 character hexadecimal string (32 bytes)')
 			}
 			if (!/^[0-9a-fA-F]+$/i.test(entropy)) {
-				throw new Error('Entopy is not a valid hexadecimal string')
+				throw new Error('Entropy is not a valid hexadecimal string')
 			}
 		}
 
@@ -47,10 +47,10 @@ export default class Bip39Mnemonic {
 	static createLegacyWallet = (seed?: string): MnemonicSeed => {
 		if (seed) {
 			if (seed.length !== 64) {
-				throw new Error('Invalid entropy length, must be a 32 bit hexadecimal string')
+				throw new Error('Invalid seed length, must be a 64 character hexadecimal string (32 bytes)')
 			}
 			if (!/^[0-9a-fA-F]+$/i.test(seed)) {
-				throw new Error('Entopy is not a valid hexadecimal string')
+				throw new Error('Seed is not a valid hexadecimal string')
 			}
 		}
 
